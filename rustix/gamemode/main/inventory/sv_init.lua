@@ -166,8 +166,8 @@ net.Receive("gRustWriteSlot", function(len, ply)
     local proxy_wep = net.ReadString()
     local proxy_id = net.ReadFloat()
     local itemz = ITEMS:GetItem(proxy_wep)
-    print(itemz, proxy_wep)
-    if not itemz then return end
+    if not itemz then return ply:SelectWeapon("rust_hands") end
+    ply:SelectWeapon(itemz.Weapon)
     if id ~= -1 then
         ply.tbl[id] = {
             Slotz = id,
@@ -198,8 +198,9 @@ end)
 
 hook.Add("PlayerSpawn", "GiveITem", function(ply)
     PickleAdilly(ply, "Rock")
-    ply:SetNWInt("Hunger", math.random(90,120))
-    ply:SetNWInt("Thirst", math.random(90,100))
+    ply:Give("rust_hands")
+    ply:SetNWInt("Hunger", math.random(90, 120))
+    ply:SetNWInt("Thirst", math.random(90, 100))
 end)
 
 hook.Add("PlayerDeath", "GiveITem", function(vic, inf, attacker)

@@ -6,7 +6,6 @@ gRustJas.Inventory = {}
 local pnl2 = nil
 local frame2 = nil
 function DoDrop(self, panels, bDoDrop, Command, x, y)
-    print(panels[1].OldSlot, self.CodeID, self.CodeSortID)
     if bDoDrop and panels[1].OldSlot ~= self.CodeSortID then
         net.Start("gRustWriteSlot")
         net.WriteFloat(self.CodeSortID or -1)
@@ -41,7 +40,14 @@ local function ClearSlots(tbl2)
             pnl1[i]:SetWide(180)
             pnl1[i].CodeSortID = i
             pnl1[i]:Receiver("DroppableRust", DoDrop)
-            pnl1[i].Paint = function(s, ww, hh) draw.RoundedBox(0, 0, 0, ww, hh, Color(99, 99, 99, 190)) end
+            pnl1[i].Paint = function(s, ww, hh)
+                if s:IsHovered() then
+                    draw.RoundedBox(0, 0, 0, ww, hh, Color(5, 217, 255, 190))
+                else
+                    draw.RoundedBox(0, 0, 0, ww, hh, Color(99, 99, 99, 190))
+                end
+            end
+
             grid:AddCell(pnl1[i])
         end
     end
@@ -50,15 +56,23 @@ local function ClearSlots(tbl2)
         if v.Img == nil then continue end
         if pnl1[v.Slotz] == nil then continue end
         local DermaImageButton = vgui.Create("DImageButton", pnl1[v.Slotz])
-        DermaImageButton:SetSize(70, 71)
-        DermaImageButton:SetPos(0, 4)
+        DermaImageButton:SetSize(80,80)
+        DermaImageButton:SetPos(0, 0)
         DermaImageButton:SetImage(v.Img)
         DermaImageButton:Droppable("DroppableRust")
         DermaImageButton.DoClick = function() MsgN("You clicked the image!") end
         DermaImageButton.Model_IMG = v.Img
         DermaImageButton.Weap = v.Weapon
         DermaImageButton.OldSlot = v.Slotz
-        DermaImageButton.Paint = function(s, w, h) draw.DrawText(tostring(v.Amount), "Default", 0, 0, Color(0, 0, 0), TEXT_ALIGN_LEFT) end
+        DermaImageButton.Paint = function(s, ww, hh)
+            if s:IsHovered() then
+                draw.RoundedBox(0, 0, 0, ww, hh, Color(5, 217, 255, 190))
+            else
+                draw.RoundedBox(0, 0, 0, ww, hh, Color(99, 99, 99, 190))
+            end
+
+            draw.DrawText(tostring(v.Amount), "Default", 0, 0, Color(0, 0, 0), TEXT_ALIGN_LEFT)
+        end
     end
 end
 
@@ -88,7 +102,14 @@ function GM:ScoreboardShow()
             pnl2[i]:SetWide(180)
             pnl2[i].CodeSortID = i
             pnl2[i]:Receiver("DroppableRust", DoDrop)
-            pnl2[i].Paint = function(s, ww, hh) draw.RoundedBox(0, 0, 0, ww, hh, Color(99, 99, 99, 190)) end
+            pnl2[i].Paint = function(s, ww, hh)
+                if s:IsHovered() then
+                    draw.RoundedBox(0, 0, 0, ww, hh, Color(5, 217, 255, 190))
+                else
+                    draw.RoundedBox(0, 0, 0, ww, hh, Color(99, 99, 99, 190))
+                end
+            end
+
             grid2:AddCell(pnl2[i])
         end
     end
@@ -97,15 +118,23 @@ function GM:ScoreboardShow()
         if v.Img == nil then continue end
         if pnl2[v.Slotz] == nil then continue end
         local DermaImageButton = vgui.Create("DImageButton", pnl2[v.Slotz])
-        DermaImageButton:SetSize(70, 71)
-        DermaImageButton:SetPos(0, 4)
+        DermaImageButton:SetSize(80,80)
+        DermaImageButton:SetPos(0, 0)
         DermaImageButton:SetImage(v.Img)
         DermaImageButton:Droppable("DroppableRust")
         DermaImageButton.DoClick = function() MsgN("You clicked the image!") end
         DermaImageButton.Model_IMG = v.Img
         DermaImageButton.Weap = v.Weapon
         DermaImageButton.OldSlot = v.Slotz
-        DermaImageButton.Paint = function(s, w, h) draw.DrawText(tostring(v.Amount), "Default", 0, 0, Color(0, 0, 0), TEXT_ALIGN_LEFT) end
+        DermaImageButton.Paint = function(s, ww, hh)
+            if s:IsHovered() then
+                draw.RoundedBox(0, 0, 0, ww, hh, Color(5, 217, 255, 190))
+            else
+                draw.RoundedBox(0, 0, 0, ww, hh, Color(99, 99, 99, 190))
+            end
+
+            draw.DrawText(tostring(v.Amount), "Default", 0, 0, Color(0, 0, 0), TEXT_ALIGN_LEFT)
+        end
     end
 
     gui.EnableScreenClicker(true)
