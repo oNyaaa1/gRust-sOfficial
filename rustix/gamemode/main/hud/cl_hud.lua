@@ -28,7 +28,10 @@ end)
 local hide = {
     ["CHudHealth"] = true,
     ["CHudAmmo"] = true,
-    ["CHudWeaponSelection"] = true
+    ["CHudWeaponSelection"] = true,
+    ["CHudSecondaryAmmo"] = true,
+	["CHudDamageIndicator"] = true,
+	["CHudVoiceStatus"] = true
 }
-
+	
 hook.Add("HUDShouldDraw", "rustHide", function(name) if hide[name] then return false end end)

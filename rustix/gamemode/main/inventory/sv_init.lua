@@ -166,8 +166,14 @@ net.Receive("gRustWriteSlot", function(len, ply)
     local proxy_wep = net.ReadString()
     local proxy_id = net.ReadFloat()
     local itemz = ITEMS:GetItem(proxy_wep)
-    if not itemz then return ply:SelectWeapon("rust_hands") end
-    ply:SelectWeapon(itemz.Weapon)
+    if not itemz then return end
+    if id >= 1 and id <= 6 then
+        print(itemz.Weapon)
+        ply:SelectWeapon(itemz.Weapon)
+    else
+        ply:SelectWeapon("rust_hands")
+    end
+
     if id ~= -1 then
         ply.tbl[id] = {
             Slotz = id,
