@@ -1,0 +1,8 @@
+"rustix"
+{
+	"base"		    "base"
+	"title"		    "oNyaaaa's | gRust"
+	"maps"		    ""
+	"category"	    "pvp"
+	"menusystem"	"1"
+}
