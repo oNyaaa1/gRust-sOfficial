@@ -17,6 +17,7 @@ function DoDrop(self, panels, bDoDrop, Command, x, y)
     end
 end
 
+local DermaImageButton = {}
 local pnl1 = {}
 local function ClearSlots(tbl2)
     if IsValid(pnl2) then pnl2:Remove() end
@@ -53,18 +54,19 @@ local function ClearSlots(tbl2)
     end
 
     for k, v in pairs(tbl2) do
+        if not istable(v) then continue end
         if v.Img == nil then continue end
         if pnl1[v.Slotz] == nil then continue end
-        local DermaImageButton = vgui.Create("DImageButton", pnl1[v.Slotz])
-        DermaImageButton:SetSize(80,80)
-        DermaImageButton:SetPos(0, 0)
-        DermaImageButton:SetImage(v.Img)
-        DermaImageButton:Droppable("DroppableRust")
-        DermaImageButton.DoClick = function() MsgN("You clicked the image!") end
-        DermaImageButton.Model_IMG = v.Img
-        DermaImageButton.Weap = v.Weapon
-        DermaImageButton.OldSlot = v.Slotz
-        DermaImageButton.Paint = function(s, ww, hh)
+        DermaImageButton[k] = vgui.Create("DImageButton", pnl1[v.Slotz])
+        DermaImageButton[k]:SetSize(80, 80)
+        DermaImageButton[k]:SetPos(0, 0)
+        DermaImageButton[k]:SetImage(v.Img)
+        DermaImageButton[k]:Droppable("DroppableRust")
+        DermaImageButton[k].DoClick = function() MsgN("You clicked the image!") end
+        DermaImageButton[k].Model_IMG = v.Img
+        DermaImageButton[k].Weap = v.Weapon
+        DermaImageButton[k].OldSlot = v.Slotz
+        DermaImageButton[k].Paint = function(s, ww, hh)
             if s:IsHovered() then
                 draw.RoundedBox(0, 0, 0, ww, hh, Color(5, 217, 255, 190))
             else
@@ -115,18 +117,19 @@ function GM:ScoreboardShow()
     end
 
     for k, v in pairs(gRustJas.Inventory) do
+        if not istable(v) then return end
         if v.Img == nil then continue end
         if pnl2[v.Slotz] == nil then continue end
-        local DermaImageButton = vgui.Create("DImageButton", pnl2[v.Slotz])
-        DermaImageButton:SetSize(80,80)
-        DermaImageButton:SetPos(0, 0)
-        DermaImageButton:SetImage(v.Img)
-        DermaImageButton:Droppable("DroppableRust")
-        DermaImageButton.DoClick = function() MsgN("You clicked the image!") end
-        DermaImageButton.Model_IMG = v.Img
-        DermaImageButton.Weap = v.Weapon
-        DermaImageButton.OldSlot = v.Slotz
-        DermaImageButton.Paint = function(s, ww, hh)
+        DermaImageButton[k] = vgui.Create("DImageButton", pnl2[v.Slotz])
+        DermaImageButton[k]:SetSize(80, 80)
+        DermaImageButton[k]:SetPos(0, 0)
+        DermaImageButton[k]:SetImage(v.Img)
+        DermaImageButton[k]:Droppable("DroppableRust")
+        DermaImageButton[k].DoClick = function() MsgN("You clicked the image!") end
+        DermaImageButton[k].Model_IMG = v.Img
+        DermaImageButton[k].Weap = v.Weapon
+        DermaImageButton[k].OldSlot = v.Slotz
+        DermaImageButton[k].Paint = function(s, ww, hh)
             if s:IsHovered() then
                 draw.RoundedBox(0, 0, 0, ww, hh, Color(5, 217, 255, 190))
             else
@@ -146,3 +149,18 @@ function GM:ScoreboardHide()
     if IsValid(frame2) then frame2:Remove() end
     return true
 end
+
+hook.Add("PlayerBindPress", "Bindpressgturst", function(ply, bind, pressed)
+    if not pressed then return end
+    local sub = string.gsub(bind, "slot", "")
+    local num = tonumber(sub)
+    if not num or num <= 0 or num > 6 then return end
+    if IsValid(DermaImageButton[num]) then
+        net.Start("gRustSelectWep")
+        net.WriteFloat(num)
+        net.WriteFloat(-1)
+        net.WriteString(DermaImageButton[num].Weap or "")
+        net.WriteFloat(num)
+        net.SendToServer()
+    end
+end)

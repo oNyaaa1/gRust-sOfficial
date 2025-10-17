@@ -41,6 +41,7 @@ end
 local FindSlot = function(ply, item)
     local itemz = ITEMS:GetItem(item)
     for k, v in pairs(ply.tbl) do
+        if not istable(v) then continue end
         if v.Img == itemz.model then return v end
     end
     return nil
@@ -60,6 +61,7 @@ function PickleAdillyEdit(ply, wep, amount)
         return
     end
 
+    ply:Give(itemz.Weapon)
     local slot = FindSlot(ply, wep)
     if slot == nil then
         print("slot == nil")
@@ -130,8 +132,6 @@ function PickleAdillyEdit(ply, wep, amount)
         net.Send(ply)
         return ply.tbl
     end
-
-    if itemz.Weapon ~= "" then ply:Give(itemz.Weapon) end
 end
 
 local meta = FindMetaTable("Player")
@@ -160,12 +160,30 @@ function PickleAdilly(ply, wep)
     net.Send(ply)
 end
 
+util.AddNetworkString("gRustSelectWep")
+net.Receive("gRustSelectWep", function(len, ply)
+    local id = net.ReadFloat()
+    local NewSlot = net.ReadFloat()
+    local proxy_wep = net.ReadString()
+    local proxy_id = net.ReadFloat()
+    local itemz = ITEMS:GetItem(proxy_wep)
+    print(id, NewSlot, proxy_id, proxy_wep)
+    if not itemz then return end
+    if id >= 1 and id <= 6 then
+        print(itemz.Weapon)
+        ply:SelectWeapon(itemz.Weapon)
+    else
+        ply:SelectWeapon("rust_hands")
+    end
+end)
+
 net.Receive("gRustWriteSlot", function(len, ply)
     local id = net.ReadFloat()
     local NewSlot = net.ReadFloat()
     local proxy_wep = net.ReadString()
     local proxy_id = net.ReadFloat()
     local itemz = ITEMS:GetItem(proxy_wep)
+    print(id, NewSlot, proxy_id, proxy_wep)
     if not itemz then return end
     if id >= 1 and id <= 6 then
         print(itemz.Weapon)
@@ -203,7 +221,8 @@ net.Receive("gRustWriteSlot", function(len, ply)
 end)
 
 hook.Add("PlayerSpawn", "GiveITem", function(ply)
-    PickleAdilly(ply, "Rock")
+    PickleAdillyEdit(ply, "Rock", 1)
+    PickleAdillyEdit(ply, "AK47", 1)
     ply:Give("rust_hands")
     ply:SetNWInt("Hunger", math.random(90, 120))
     ply:SetNWInt("Thirst", math.random(90, 100))
