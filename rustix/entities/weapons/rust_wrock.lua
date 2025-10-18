@@ -17,7 +17,7 @@ function SWEP:PrimaryAttack()
     self:EmitSound("tools/rock_swing.mp3")
     self:SendWeaponAnim(ACT_VM_SWINGMISS)
     self.delay = CurTime() + 0.5
-    self:SetNextPrimaryFire(CurTime() + 1)
+    self:SetNextPrimaryFire(CurTime() + 1.5)
     local tr = pl:GetEyeTrace()
     self.Clicked = true
 end

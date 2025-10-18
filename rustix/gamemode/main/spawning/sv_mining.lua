@@ -4,12 +4,12 @@ local ORE_WEAPONS = {
         ["Sulfur Ore"] = 1,
         ["Stone"] = 1
     },
-    ["rust_stonepickaxe"] = {
+    ["tfa_rustalpha_stone_hatchet"] = {
         ["Metal Ore"] = 1.94,
         ["Sulfur Ore"] = 2.57,
         ["Stone"] = 2.11733
     },
-    ["rust_pickaxe"] = {
+    ["tfa_rustalpha_pickaxe"] = {
         ["Metal Ore"] = 2.4,
         ["Sulfur Ore"] = 3,
         ["Stone"] = 2.667
@@ -37,20 +37,11 @@ local ORE_SEQ = {
 }
 
 -- Function to check if a weapon is a valid mining tool
-gRust.Mining.IsValidMiningTool = function(weaponClass)
-    return ORE_WEAPONS[weaponClass] ~= nil
-end
-
-gRust.Items = {
-    ["Stone"] = "Stone",
-    ["Metal Ore"] = "Metal Ore",
-    ["Sulfur Ore"] = "Sulfur Ore",
-}
-
+gRust.Mining.IsValidMiningTool = function(weaponClass) return ORE_WEAPONS[weaponClass] ~= nil end
 gRust.Mining.MineOres = function(ply, ent, weapon, class)
-     if not ply.Wood_Cutting_Tool then ply.Wood_Cutting_Tool = 0 end
+    if not ply.Wood_Cutting_Tool then ply.Wood_Cutting_Tool = 0 end
     if ply.Wood_Cutting_Tool > CurTime() then return end
-    ply.Wood_Cutting_Tool = CurTime() + 1
+    ply.Wood_Cutting_Tool = CurTime() + 0.2
     local tool = ORE_WEAPONS[class]
     if not tool then return end
     local seq = ORE_SEQ[ent:GetSkin()] or ORE_SEQ[1]
@@ -60,16 +51,28 @@ gRust.Mining.MineOres = function(ply, ent, weapon, class)
     local multForOre = tool[seq.item] or 1
     local reward = math.Round(seq.seq[idx] * multForOre)
     local itemClass = seq.item
-    local itemData = gRust.Items[itemClass]
-    local itemName = itemData and itemClass
+    local itemData = ITEMS:GetItem(itemClass)
+    local itemName = itemData and itemData.Name
     ply:GiveItem(seq.item, reward)
     ply:SendNotification(itemName, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward)
+    if ent.AttacksRock == nil then ent.AttacksRock = 0 end
+    ent.AttacksRock = ent.AttacksRock + 10
+    if ent.AttacksRock >= 50 then
+        ent:SetModel("models/environment/ores/ore_node_stage2.mdl")
+        ent:EmitSound("tools/rock_strike_1.mp3")
+    end
 
-     if ent.oreHealth <= 0 then
+    if ent.AttacksRock >= 80 then
+        ent:SetModel("models/environment/ores/ore_node_stage3.mdl")
+        ent:EmitSound("tools/rock_strike_1.mp3")
+    end
+
+    if ent.oreHealth <= 0 then
+        ent:EmitSound("tools/rock_strike_1.mp3")
         local pos = ent:GetPos()
         ent:Remove()
         timer.Simple(math.random(300, 600), function()
-            local e = ents.Create("rust_ore")
+            local e = ents.Create("rust_ores")
             if IsValid(e) then
                 e:SetPos(pos)
                 e:SetSkin(math.random(1, 3))

@@ -170,7 +170,6 @@ net.Receive("gRustSelectWep", function(len, ply)
     print(id, NewSlot, proxy_id, proxy_wep)
     if not itemz then return end
     if id >= 1 and id <= 6 then
-        print(itemz.Weapon)
         ply:SelectWeapon(itemz.Weapon)
     else
         ply:SelectWeapon("rust_hands")

@@ -4,11 +4,11 @@ AddCSLuaFile("config.lua")
 include("config.lua")
 include("shared.lua")
 --[[
-Added colorization to inventory on hover
-Swap to hands if there is no obj or wep in hands in inventory swap
-Enlarged image and setpos-y = 0 so it's not off singly handed
-Added more to HUDShouldDraw to stop annoying huds
-Added Init Ghost Entity to swap weapons
+Added Trees
+Improved Ak47
+Slowed rock hitting down
+Added Muzzleflash to ak47
+
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")
