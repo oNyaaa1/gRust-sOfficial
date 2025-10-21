@@ -22,13 +22,12 @@ local WOOD_SEQ = {6, 14, 22, 32, 43, 55, 68, 83, 99, 128}
 gRust.Mining.IsValidWoodcuttingTool = function(weaponClass) return WOOD_WEAPONS[weaponClass] ~= nil end
 -- Helper function to make trees fall and fade away
 local function MakeTreeFall(ent)
-    print(ent)
     if not IsValid(ent) then return end
     -- Store tree information for respawn
     local treePos = ent:GetPos()
     local treeAngles = ent:GetAngles()
     local treeModel = ent:GetModel()
-    ent:SetPos(ent:GetPos() + Vector(0,0,51))
+    ent:SetPos(ent:GetPos() + Vector(0, 0, 51))
     -- Convert to physics object and make it fall
     ent:SetMoveType(MOVETYPE_VPHYSICS)
     ent:SetSolid(SOLID_VPHYSICS) -- Keep solid for world collision
@@ -111,6 +110,11 @@ gRust.Mining.MineTrees = function(ply, ent, maxHP, weapon, class)
 
         ent.Hitted = true
         ent.treeHealth = 0
+        --[[net.Start("gRust.TreeEffects")
+        net.WriteVector(nil)
+        net.WriteAngle(nil)
+        net.WriteEntity(nil)
+        net.Send(ply)]]
         MakeTreeFall(ent)
     elseif ent.treeHealth > 0 then
         local idx = math.min(ent.treeHits, #WOOD_SEQ)

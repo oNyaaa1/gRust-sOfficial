@@ -21,6 +21,7 @@ function meta:NotifyWood(amount)
 end
 
 local function SendTreeHit(ply, ent)
+    print(ent)
     if ent == nil then
         net.Start("gRust.TreeEffects")
         net.WriteVector(Vector())
@@ -37,7 +38,7 @@ local function SendTreeHit(ply, ent)
     local randomOffset = VectorRand() * radius
     randomOffset.x = math.Rand(-5, 5)
     randomOffset.y = math.random(-1, 1)
-    hitPos = hitPos + randomOffset
+    hitPos = hitPos + ent:OBBCenter() * radius * Vector(2, 2, 2) --randomOffset
     if ent.LastPos == nil then ent.LastPos = hitPos end
     local dist = tr.HitPos:Distance(ent.LastPos)
     if not ent.NoMarker then
@@ -151,7 +152,7 @@ local TREE_MODELS = {
 
 local WOOD_SEQ = {6, 14, 22, 32, 43, 55, 68, 83, 99, 128}
 hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
-    local MAT = BackwardsEnums("MAT_")
+    /*local MAT = BackwardsEnums("MAT_")
     local ply = dmginfo:GetAttacker()
     if not IsValid(ply) then return end
     local wep = ply:GetActiveWeapon() --if not IsValid(ply) then return end
@@ -172,13 +173,12 @@ hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
         ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward)
         PickleAdillyEdit(ply, "Wood", 300)
         if ent.treeHealth <= 0 then
-            SendTreeHit(ply, nil)
-            MakeTreeFall(ent)
-            return
+            --SendTreeHit(ply, nil)
+            --MakeTreeFall(ent)
+            -- return
         end
-
-        SendTreeHit(ply, ent)
     end
 
-    if ent:GetClass() == "sent_rocks" then end
+    SendTreeHit(ply, ent)
+    if ent:GetClass() == "sent_rocks" then end*/
 end)

@@ -8,8 +8,6 @@ surface.CreateFont("gRustColorFont", {
 	bold = true,
 })
 
-
-
 function GM:PostDrawViewModel(vm, ply, weapon)
 	if weapon.UseHands or not weapon:IsScripted() then
 		local hands = LocalPlayer():GetHands()

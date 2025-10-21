@@ -61,10 +61,9 @@ function PickleAdillyEdit(ply, wep, amount)
         return
     end
 
-    ply:Give(itemz.Weapon)
+    if itemz.Weapon != "" then ply:Give(itemz.Weapon) end
     local slot = FindSlot(ply, wep)
     if slot == nil then
-        print("slot == nil")
         local sloto = FindValidSlotBackWards(ply)
         ply.tbl[sloto] = {
             Slotz = sloto,
@@ -84,9 +83,9 @@ function PickleAdillyEdit(ply, wep, amount)
     local editmode = false
     local CurrentAmount = 0
     for k, v in pairs(ply.tbl) do
+        if not istable(v) then continue end
         if v.Weapon == itemz.Name then
             local amont = v.Amount or 0
-            print(amont, v.Amount)
             if amont ~= nil and amont >= 1000 then
                 adding = true
                 slotss = k
@@ -140,26 +139,6 @@ function meta:GiveItem(item, amount)
     return true
 end
 
-function PickleAdilly(ply, wep)
-    if ply.Slots == nil then ply.Slotz = {} end
-    if ply.tbl == nil then ply.tbl = {} end
-    local itemz = ITEMS:GetItem(wep)
-    local slot = FindValidSlotBackWards(ply, 1)
-    --table.insert(ply.Slots)
-    ply.tbl[slot] = {
-        Slotz = slot,
-        Weapon = wep,
-        Img = itemz.model,
-        Amount = 1,
-        SlotFree = false,
-    }
-
-    if itemz.Weapon ~= "" then ply:Give(itemz.Weapon) end
-    net.Start("DragNDropRust")
-    net.WriteTable(ply.tbl)
-    net.Send(ply)
-end
-
 util.AddNetworkString("gRustSelectWep")
 net.Receive("gRustSelectWep", function(len, ply)
     local id = net.ReadFloat()
@@ -167,7 +146,6 @@ net.Receive("gRustSelectWep", function(len, ply)
     local proxy_wep = net.ReadString()
     local proxy_id = net.ReadFloat()
     local itemz = ITEMS:GetItem(proxy_wep)
-    print(id, NewSlot, proxy_id, proxy_wep)
     if not itemz then return end
     if id >= 1 and id <= 6 then
         ply:SelectWeapon(itemz.Weapon)
@@ -182,10 +160,8 @@ net.Receive("gRustWriteSlot", function(len, ply)
     local proxy_wep = net.ReadString()
     local proxy_id = net.ReadFloat()
     local itemz = ITEMS:GetItem(proxy_wep)
-    print(id, NewSlot, proxy_id, proxy_wep)
     if not itemz then return end
     if id >= 1 and id <= 6 then
-        print(itemz.Weapon)
         ply:SelectWeapon(itemz.Weapon)
     else
         ply:SelectWeapon("rust_hands")

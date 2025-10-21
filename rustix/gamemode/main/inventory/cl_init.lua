@@ -117,7 +117,7 @@ function GM:ScoreboardShow()
     end
 
     for k, v in pairs(gRustJas.Inventory) do
-        if not istable(v) then return end
+        if not istable(v) then continue end
         if v.Img == nil then continue end
         if pnl2[v.Slotz] == nil then continue end
         DermaImageButton[k] = vgui.Create("DImageButton", pnl2[v.Slotz])

@@ -46,7 +46,6 @@ function ENT:OnTakeDamage(dmg)
     attacker:EmitSound("tools/rock_strike_1.mp3")
     if self.SetHealthz == nil then self.SetHealthz = 300 end
     self.SetHealthz = self.SetHealthz - 30
-    print("hi")
     if self.SetHealthz <= 240 then self:SetModel("models/environment/ores/ore_node_stage2.mdl") end
     if self.SetHealthz <= 150 then self:SetModel("models/environment/ores/ore_node_stage3.mdl") end
     if self.SetHealthz <= 60 then self:SetModel("models/environment/ores/ore_node_stage4.mdl") end

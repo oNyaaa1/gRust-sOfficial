@@ -15,7 +15,6 @@ function SWEP:Initialize()
         local pl = self:GetOwner()
         if IsValid(pl) then
             pl:GiveAmmo(120, self.Primary.Ammo, true)
-            print(self.Primary.Ammo)
         end
     end
 end

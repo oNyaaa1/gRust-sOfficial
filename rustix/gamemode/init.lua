@@ -4,10 +4,9 @@ AddCSLuaFile("config.lua")
 include("config.lua")
 include("shared.lua")
 --[[
-Added Trees
-Improved Ak47
-Slowed rock hitting down
-Added Muzzleflash to ak47
+Fixed mouse not working on inventory opening
+Removed debugging prints
+Fixed inventory error
 
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
