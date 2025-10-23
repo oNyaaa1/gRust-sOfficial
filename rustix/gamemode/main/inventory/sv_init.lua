@@ -61,9 +61,10 @@ function PickleAdillyEdit(ply, wep, amount)
         return
     end
 
-    if itemz.Weapon != "" then ply:Give(itemz.Weapon) end
+    if itemz.Weapon ~= "" then ply:Give(itemz.Weapon) end
     local slot = FindSlot(ply, wep)
-    if slot == nil then
+    if slot == nil and amount > 0 then
+        ply:SetNWFloat(wep, amount)
         local sloto = FindValidSlotBackWards(ply)
         ply.tbl[sloto] = {
             Slotz = sloto,
@@ -99,8 +100,9 @@ function PickleAdillyEdit(ply, wep, amount)
         end
     end
 
-    if editmode == true and slotss ~= 0 then
+    if editmode == true and slotss ~= 0 and CurrentAmount > 0 then
         print("Editing")
+        ply:SetNWFloat(wep, CurrentAmount + amount)
         ply.tbl[slotss] = {
             Slotz = slotss,
             Weapon = wep,
@@ -115,8 +117,9 @@ function PickleAdillyEdit(ply, wep, amount)
         return ply.tbl
     end
 
-    if adding then
+    if adding and amount > 0 then
         print("Adding")
+        ply:SetNWFloat(wep, amount)
         local sloto = FindValidSlotBackWards(ply)
         ply.tbl[sloto] = {
             Slotz = sloto,
@@ -136,6 +139,51 @@ end
 local meta = FindMetaTable("Player")
 function meta:GiveItem(item, amount)
     PickleAdillyEdit(self, item, amount)
+    return true
+end
+
+function meta:TakeItem(item, amount)
+    local itemz = ITEMS:GetItem(item)
+    if not itemz then
+        print("Cannot find", item, " As an item!")
+        return
+    end
+
+    for k, v in pairs(self.tbl) do
+        if not istable(v) then continue end
+        if v.Weapon == itemz.Name then
+            local amont = v.Amount or 0
+            if amont ~= nil and amont >= 1000 then
+                adding = true
+                slotss = k
+                CurrentAmount = amont
+            elseif v.Weapon == itemz.Name and amont < 1000 then
+                editmode = true
+                slotss = k
+                CurrentAmount = amont
+                break
+            end
+        end
+    end
+
+    print("Removing")
+    if CurrentAmount < amount then
+        print("Not enough wood")
+        return false
+    end
+
+    self:SetNWFloat(item, CurrentAmount - amount)
+    self.tbl[slotss] = {
+        Slotz = slotss,
+        Weapon = item,
+        Img = itemz.model,
+        Amount = CurrentAmount - amount,
+        SlotFree = false,
+    }
+
+    net.Start("DragNDropRust")
+    net.WriteTable(self.tbl)
+    net.Send(self)
     return true
 end
 
@@ -201,6 +249,19 @@ hook.Add("PlayerSpawn", "GiveITem", function(ply)
     ply:Give("rust_hands")
     ply:SetNWInt("Hunger", math.random(90, 120))
     ply:SetNWInt("Thirst", math.random(90, 100))
+    local ITEM = nil
+    for _, vk in pairs(ITEMS) do
+        if type(vk) == "function" then continue end
+        if type(vk) == "table" then ITEM = vk end
+    end
+
+    for k, v in ipairs(ITEM.Craft()) do
+        if istable(v) then
+            for i, j in ipairs(v) do
+                if istable(j) then ply:GiveItem(j.ITEM, 0) end
+            end
+        end
+    end
 end)
 
 hook.Add("PlayerDeath", "GiveITem", function(vic, inf, attacker)

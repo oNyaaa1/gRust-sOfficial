@@ -113,12 +113,13 @@ local function RightPanelInfo(pnl, ITEM)
             for i, j in ipairs(v) do
                 if istable(j) then
                     local time = string.FormattedTime(v.Time, "%02i:%02i")
-                    AppList:AddLine(tostring(j.AMOUNT), tostring(j.ITEM), "2", "321", tostring(time) .. " Seconds", tostring(v.CanCraft))
+                    AppList:AddLine(tostring(j.AMOUNT), tostring(j.ITEM), "0", tostring(LocalPlayer():GetNWFloat(j.ITEM, 0) or 0), tostring(time) .. " Seconds", tostring(v.CanCraft))
                 end
             end
         end
     end
-    //pnl:GetColumnText(1) index
+
+    --pnl:GetColumnText(1) index
     AppList.OnRowSelected = function(lst, index, pnl) end
     local Buttonzz = vgui.Create("DButton", dpanel)
     Buttonzz:Dock(BOTTOM)
@@ -129,6 +130,8 @@ local function RightPanelInfo(pnl, ITEM)
         draw.RoundedBox(0, 0, 0, w, h, Color(66, 66, 66))
         draw.DrawText("CRAFT", "CraftingRustFont", 110, 25, Color(255, 255, 255, 255), TEXT_ALIGN_LEFT)
     end
+
+    Buttonzz.DoClick = function() net.Start("BuildingCrafting") net.WriteString(ITEM.Name) net.SendToServer() end
     return dpanel2
 end
 

@@ -77,7 +77,7 @@ ITEMS:RegisterItem("Building Plan", {
     Info = "The Building Plan, For building",
     Category = "Tools",
     model = "materials/items/tools/building_plan.png",
-    Weapon = "rust_builder",
+    Weapon = "hands_builder",
     Count = 1,
     Craft = function()
         return {
@@ -98,7 +98,7 @@ ITEMS:RegisterItem("Hammer", {
     Info = "Hammer, Upgrading ur base!",
     Category = "Tools",
     model = "materials/items/tools/hammer.png",
-    Weapon = "rust_hammer",
+    Weapon = "hands_hammer",
     Count = 1,
     Craft = function()
         return {

@@ -4,9 +4,9 @@ AddCSLuaFile("config.lua")
 include("config.lua")
 include("shared.lua")
 --[[
-Fixed mouse not working on inventory opening
-Removed debugging prints
-Fixed inventory error
+Added Crafting wood correct amount on craft menu
+Reset wood back to 0 even on crafting menu
+Added timer to crafting
 
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
