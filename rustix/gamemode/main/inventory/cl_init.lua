@@ -73,7 +73,7 @@ local function ClearSlots(tbl2)
                 draw.RoundedBox(0, 0, 0, ww, hh, Color(99, 99, 99, 190))
             end
 
-            draw.DrawText(tostring(v.Amount), "Default", 0, 0, Color(0, 0, 0), TEXT_ALIGN_LEFT)
+            draw.DrawText(tostring(v.Amount), "Default", ww, hh / 2 - 50, Color(0, 0, 0), TEXT_ALIGN_LEFT)
         end
     end
 end
@@ -136,7 +136,7 @@ function GM:ScoreboardShow()
                 draw.RoundedBox(0, 0, 0, ww, hh, Color(99, 99, 99, 190))
             end
 
-            draw.DrawText(tostring(v.Amount), "Default", 0, 0, Color(0, 0, 0), TEXT_ALIGN_LEFT)
+            draw.DrawText(tostring(v.Amount), "Default", ww, hh / 2 - 50, Color(0, 0, 0), TEXT_ALIGN_LEFT)
         end
     end
 
