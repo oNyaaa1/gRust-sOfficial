@@ -3,11 +3,15 @@ AddCSLuaFile("shared.lua")
 AddCSLuaFile("config.lua")
 include("config.lua")
 include("shared.lua")
---[[
-Added Crafting wood correct amount on craft menu
-Reset wood back to 0 even on crafting menu
-Added timer to crafting
+for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
+    resource.AddFile("sound/laced/" .. v)
+end
 
+--[[
+New AK Sound
+Added Crosshair to AK
+Added total on items and notification on gaining weps
+Added Removing item notification
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")

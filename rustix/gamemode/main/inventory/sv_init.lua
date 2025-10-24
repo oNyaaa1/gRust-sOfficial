@@ -64,6 +64,7 @@ function PickleAdillyEdit(ply, wep, amount)
     if itemz.Weapon ~= "" then ply:Give(itemz.Weapon) end
     local slot = FindSlot(ply, wep)
     if slot == nil and amount > 0 then
+        ply:SendNotification(wep, NOTIFICATION_SUCCESS, "materials/icons/pickup.png", "Total: +" .. amount)
         ply:SetNWFloat(wep, amount)
         local sloto = FindValidSlotBackWards(ply)
         ply.tbl[sloto] = {
@@ -103,6 +104,7 @@ function PickleAdillyEdit(ply, wep, amount)
     if editmode == true and slotss ~= 0 and CurrentAmount > 0 then
         print("Editing")
         ply:SetNWFloat(wep, CurrentAmount + amount)
+        ply:SendNotification(wep, NOTIFICATION_SUCCESS, "materials/icons/pickup.png", "Total: +" .. CurrentAmount + amount)
         ply.tbl[slotss] = {
             Slotz = slotss,
             Weapon = wep,
@@ -119,6 +121,7 @@ function PickleAdillyEdit(ply, wep, amount)
 
     if adding and amount > 0 then
         print("Adding")
+        ply:SendNotification(wep, NOTIFICATION_SUCCESS, "materials/icons/pickup.png", "Total: +" .. amount)
         ply:SetNWFloat(wep, amount)
         local sloto = FindValidSlotBackWards(ply)
         ply.tbl[sloto] = {
@@ -172,6 +175,7 @@ function meta:TakeItem(item, amount)
         return false
     end
 
+    self:SendNotification(item, NOTIFICATION_REMOVE, "materials/icons/bite.png", "Total: +" .. CurrentAmount - amount)
     self:SetNWFloat(item, CurrentAmount - amount)
     self.tbl[slotss] = {
         Slotz = slotss,

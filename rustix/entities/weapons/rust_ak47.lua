@@ -13,9 +13,7 @@ function SWEP:Initialize()
     self.Clicked = false
     if SERVER then
         local pl = self:GetOwner()
-        if IsValid(pl) then
-            pl:GiveAmmo(120, self.Primary.Ammo, true)
-        end
+        if IsValid(pl) then pl:GiveAmmo(120, self.Primary.Ammo, true) end
     end
 end
 
@@ -23,7 +21,7 @@ function SWEP:PrimaryAttack()
     local pl = self:GetOwner()
     if not IsValid(pl) then return end
     pl:SetAnimation(PLAYER_ATTACK1)
-    self:EmitSound("weapons/rust_distant/ak74u-attack.mp3")
+    self:EmitSound("laced/akmg.mp3")
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self.delay = CurTime() + 0.5
     self:SetNextPrimaryFire(CurTime() + 0.15)
@@ -50,4 +48,13 @@ function SWEP:Think()
 end
 
 function SWEP:SecondaryAttack()
+end
+
+function SWEP:DrawHUD()
+    local width = ScrW()
+    local height = ScrH()
+    local r, g, b, a = 255, 255, 255, 255
+    surface.DrawLine(width / 2 - 10, height / 2, width / 2 + 10, height / 2)
+    surface.DrawLine(width / 2, height / 2 - 10, width / 2, height / 2 + 10)
+    surface.SetDrawColor(r, g, b, a)
 end
