@@ -8,8 +8,9 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-Added IronSights to ak47
-
+Added total amount to image hud
+Fixed Hud on notification removing not showing right amount removed
+Fixed building system - Test System added
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")

@@ -258,7 +258,7 @@ hook.Add("HUDPaint", "AZRM::Render2D", function()
                     AZN_RadialMenu.utils.drawArc(arcs2[i])
                 end
 
-                setDrawColor(64,64,64, 255)
+                setDrawColor(64, 64, 64, 255)
                 AZN_RadialMenu.utils.drawArc(innerCircle2)
                 -- drawText( "Selection", "RadialMenu_Big", ScrW() / 2, ScrH() / 2 - 21, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER )
                 for i = 1, #centers2 do
@@ -291,6 +291,8 @@ hook.Add("HUDPaint", "AZRM::Render2D", function()
                     net.Start("gRust_ServerModel")
                     net.WriteString(AZN_RadialMenu.emotes[i])
                     net.SendToServer()
+                    if Rust.GhostEntity then Rust.GhostEntity = nil end
+                    Rust.Selected = AZN_RadialMenu.emotes[i]
                     showMenu = false
                     return
                 end
@@ -311,7 +313,6 @@ hook.Add("HUDPaint", "AZRM::Render2D", function()
             for i = 1, #centers do
                 local withinPoly = AZN_RadialMenu.utils.math.inPolygon(arcs[i], gui.MouseX(), gui.MouseY())
                 if scripted_ents.Get(AZN_RadialMenu.emotes[i]) then
-
                     if AZN_RadialMenu.emotes[i] == "sent_foundation" then
                         local txt = scripted_ents.Get(AZN_RadialMenu.emotes[i]).PrintName .. "\n"
                         local txt2 = "This is a foundation\n to build before placing a wall!\n\n\n\n\n"
@@ -322,7 +323,6 @@ hook.Add("HUDPaint", "AZRM::Render2D", function()
                         surface.SetDrawColor(0, 0, 0, 255)
                         surface.DrawTexturedRect(centers[i][1], centers[i][2] - fontHeight, 50, 50)
                         Rust.GhostEntity = nil
-                        Rust.Selected = "sent_foundation"
                     end
 
                     if AZN_RadialMenu.emotes[i] == "sent_wall" then
@@ -334,8 +334,6 @@ hook.Add("HUDPaint", "AZRM::Render2D", function()
                         surface.SetMaterial(wall)
                         surface.SetDrawColor(0, 0, 0, 255)
                         surface.DrawTexturedRect(centers[i][1], centers[i][2] - fontHeight, 50, 50)
-                        Rust.GhostEntity = nil
-                        Rust.Selected = "sent_wall"
                     end
 
                     if AZN_RadialMenu.emotes[i] == "sent_ceiling" then
@@ -347,8 +345,6 @@ hook.Add("HUDPaint", "AZRM::Render2D", function()
                         surface.SetMaterial(ceiling)
                         surface.SetDrawColor(0, 0, 0, 255)
                         surface.DrawTexturedRect(centers[i][1], centers[i][2] - fontHeight, 50, 50)
-                        Rust.GhostEntity = nil
-                        Rust.Selected = "sent_ceiling"
                     end
 
                     if AZN_RadialMenu.emotes[i] == "sent_doorway" then
@@ -360,8 +356,6 @@ hook.Add("HUDPaint", "AZRM::Render2D", function()
                         surface.SetMaterial(doorway)
                         surface.SetDrawColor(0, 0, 0, 255)
                         surface.DrawTexturedRect(centers[i][1], centers[i][2] - fontHeight, 50, 50)
-                        Rust.GhostEntity = nil
-                        Rust.Selected = "sent_doorway"
                     end
 
                     if AZN_RadialMenu.emotes[i] == "sent_door" then
@@ -373,8 +367,6 @@ hook.Add("HUDPaint", "AZRM::Render2D", function()
                         surface.SetMaterial(door)
                         surface.SetDrawColor(0, 0, 0, 255)
                         surface.DrawTexturedRect(centers[i][1], centers[i][2] - fontHeight, 50, 50)
-                        Rust.GhostEntity = nil
-                        Rust.Selected = "sent_door"
                     end
                 end
             end

@@ -58,7 +58,7 @@ local function ClearSlots(tbl2)
         if v.Img == nil then continue end
         if pnl1[v.Slotz] == nil then continue end
         DermaImageButton[k] = vgui.Create("DImageButton", pnl1[v.Slotz])
-        DermaImageButton[k]:SetSize(80, 80)
+        DermaImageButton[k]:SetSize(80, 76)
         DermaImageButton[k]:SetPos(0, 0)
         DermaImageButton[k]:SetImage(v.Img)
         DermaImageButton[k]:Droppable("DroppableRust")
@@ -72,8 +72,8 @@ local function ClearSlots(tbl2)
             else
                 draw.RoundedBox(0, 0, 0, ww, hh, Color(99, 99, 99, 190))
             end
-
-            draw.DrawText(tostring(v.Amount), "Default", ww, hh / 2 - 50, Color(0, 0, 0), TEXT_ALIGN_LEFT)
+ 
+            draw.DrawText(tostring(v.Amount), "Default", ww / 2 + 40, hh - 10, Color(0, 0, 0), TEXT_ALIGN_RIGHT)
         end
     end
 end

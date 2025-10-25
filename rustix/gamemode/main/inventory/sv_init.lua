@@ -175,7 +175,6 @@ function meta:TakeItem(item, amount)
         return false
     end
 
-    self:SendNotification(item, NOTIFICATION_REMOVE, "materials/icons/bite.png", "Total: +" .. CurrentAmount - amount)
     self:SetNWFloat(item, CurrentAmount - amount)
     self.tbl[slotss] = {
         Slotz = slotss,
@@ -185,6 +184,7 @@ function meta:TakeItem(item, amount)
         SlotFree = false,
     }
 
+    self:SendNotification(item, NOTIFICATION_REMOVE, "materials/icons/bite.png", "Total: -" .. amount)
     net.Start("DragNDropRust")
     net.WriteTable(self.tbl)
     net.Send(self)

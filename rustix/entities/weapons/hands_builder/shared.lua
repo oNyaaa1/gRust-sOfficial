@@ -41,6 +41,7 @@ function SWEP:Initialize()
     self:SetHoldType("melee")
 end
 
+if SERVER then net.Receive("gRust_ServerModel", function(len, ply) ply.Selected = net.ReadString() end) end
 local Valid = {}
 function SWEP:PrimaryAttack()
     if not SERVER then return end
@@ -57,50 +58,36 @@ function SWEP:PrimaryAttack()
     local canPlace = false
     nearEnt = tblOfEnts[1]
     local entOnGround = nearEnt --or ply:GetGroundEntity()
-    local twig = ents.Create("sent_foundation")
+    local twig = ents.Create(ply.Selected ~= nil and ply.Selected or "sent_foundation")
     self.Pos = nil
     if not IsValid(twig) then return end
-    if nearEnt ~= game.GetWorld() and IsValid(entOnGround) then
-        if Position >= 1 and Position <= 40 or Position >= 320 and Position <= 360 then
-            self.Pos = Vector(entOnGround:GetPos().x - entOnGround:OBBMins().x + 60, entOnGround:GetPos().y, entOnGround:GetPos().z)
-            Angl = 0
-            canPlace = true
-        elseif Position > 50 and Position < 120 then
-            self.Pos = Vector(entOnGround:GetPos().x, entOnGround:GetPos().y + entOnGround:OBBMins().y - 60, entOnGround:GetPos().z)
-            canPlace = true
-            Angl = 270
-        elseif Position > 146 and Position < 217 then
-            self.Pos = Vector(entOnGround:GetPos().x + entOnGround:OBBMins().x - 60, entOnGround:GetPos().y, entOnGround:GetPos().z)
-            canPlace = true
-            Angl = 0
-        elseif Position > 234 and Position < 310 then
-            self.Pos = Vector(entOnGround:GetPos().x, entOnGround:GetPos().y - entOnGround:OBBMins().y + 60, entOnGround:GetPos().z)
-            canPlace = true
-            Angl = 270
-        end
-    else
-        twig:SetPos(ply:GetEyeTrace().HitPos)
+    if nearEnt ~= game.GetWorld() and IsValid(twig) and entOnGround and IsValid(entOnGround) then
+        self.Pos, self.Ang = Rust.Nests[ply.Selected ~= nil and ply.Selected or "sent_foundation"].Pos(Position, entOnGround)
+        --self.Pos, self.Ang = Rust.Nests[Rust.Selected ~= nil and Rust.Selected or "sent_foundation"].Pos(Position, entOnGround)
         canPlace = true
-        Angl = 0
+    else
+        self.Pos, self.Ang = ply:GetEyeTrace().HitPos, Angle(0, 0, 0)
+        canPlace = true
     end
 
     if self.Pos then twig:SetPos(self.Pos) end
-    if self.Pos then
+    if self.Ang then twig:SetAngles(self.Ang) end
+    if self.Pos and entOnGround and IsValid(entOnGround) then
         for k, v in pairs(ents.FindInSphere(self.Pos, 3)) do
             if not v then
                 Valid[k] = nil
                 canPlace = false
             end
         end
+    else
+        canPlace = true
     end
 
     local countEnt = 0
     for i = 1, #Valid do
         if IsValid(Valid[i]) then
             for k, v in pairs(ents.FindInSphere(Valid[i]:GetPos(), 10)) do
-                if twig == v and v:GetClass() == "sent_foundation" then
-                    countEnt = countEnt + 1
-                end
+                if twig == v and v:GetClass() == "sent_foundation" then countEnt = countEnt + 1 end
             end
         end
     end
@@ -112,7 +99,7 @@ function SWEP:PrimaryAttack()
         return
     end
 
-    twig:SetAngles(Angle(0, self:GetAngles(), 0))
+    --twig:SetAngles(Angle(0, self:GetAngles(), 0))
     twig:Spawn()
     twig:Activate()
     ply:EmitSound("building/hammer_saw_1.wav")
@@ -155,7 +142,7 @@ if CLIENT then
     net.Receive("Rust_TableValid", function() tbl = net.ReadTable() end)
     function SWEP:Think()
         if SERVER then return end
-        if Rust.GhostEntity == nil and Rust.Nests[Rust.Selected] ~= nil then Rust.GhostEntity = ents.CreateClientProp(Rust.Nests[Rust.Selected].Model) end
+        if Rust.GhostEntity == nil and Rust.Selected ~= nil then Rust.GhostEntity = ents.CreateClientProp(Rust.Nests[Rust.Selected].Model) end
         if not IsValid(Rust.GhostEntity) then
             Rust.GhostEntity = nil
             return
@@ -174,23 +161,13 @@ if CLIENT then
         nearEnt = tblOfEnts[1]
         local entOnGround = nearEnt
         if nearEnt ~= game.GetWorld() and IsValid(Rust.GhostEntity) and entOnGround and IsValid(entOnGround) then
-            if Position >= 1 and Position <= 40 or Position >= 320 and Position <= 360 then
-                self.Pos = Vector(entOnGround:GetPos().x - entOnGround:OBBMins().x + 60, entOnGround:GetPos().y, entOnGround:GetPos().z)
-                Rust.GhostEntity:SetPos(self.Pos)
-            elseif Position > 50 and Position < 120 then
-                self.Pos = Vector(entOnGround:GetPos().x, entOnGround:GetPos().y + entOnGround:OBBMins().y - 60, entOnGround:GetPos().z)
-                Rust.GhostEntity:SetPos(self.Pos)
-            elseif Position > 146 and Position < 217 then
-                self.Pos = Vector(entOnGround:GetPos().x + entOnGround:OBBMins().x - 60, entOnGround:GetPos().y, entOnGround:GetPos().z)
-                Rust.GhostEntity:SetPos(self.Pos)
-            elseif Position > 234 and Position < 310 then
-                self.Pos = Vector(entOnGround:GetPos().x, entOnGround:GetPos().y - entOnGround:OBBMins().y + 60, entOnGround:GetPos().z)
-                Rust.GhostEntity:SetPos(self.Pos)
-            end
+            self.Pos, self.Ang = Rust.Nests[Rust.Selected ~= nil and Rust.Selected or "sent_foundation"].Pos(Position, entOnGround)
         else
-            Rust.GhostEntity:SetPos(ply:GetEyeTrace().HitPos)
+            self.Pos, self.Ang = ply:GetEyeTrace().HitPos, Angle(0, 0, 0)
         end
 
+        if self.Pos then Rust.GhostEntity:SetPos(self.Pos) end
+        if self.Ang then Rust.GhostEntity:SetAngles(self.Ang) end
         Rust.GhostEntity:Spawn()
         Rust.GhostEntity:PhysicsDestroy()
         Rust.GhostEntity:SetMoveType(MOVETYPE_NONE)
