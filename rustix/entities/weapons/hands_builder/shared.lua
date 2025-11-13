@@ -55,6 +55,13 @@ function SWEP:PrimaryAttack()
         if v:GetPos():Distance(ply:GetPos()) <= 120 then tblOfEnts[#tblOfEnts + 1] = v end
     end
 
+    local itemz = ITEMS:GetItem("Wood")
+    local bool = false
+    for k, v in pairs(itemz:Craft()) do
+        bool = ply:TakeItem(v[k].ITEM, 25)
+    end
+
+    if not bool then return end
     local canPlace = false
     nearEnt = tblOfEnts[1]
     local entOnGround = nearEnt --or ply:GetGroundEntity()

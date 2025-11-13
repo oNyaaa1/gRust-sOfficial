@@ -22,6 +22,7 @@ local CREATURE_LOOT = {
 local function MakeCreatureCorpse(ent, damageForce)
     if not IsValid(ent) then return end
     -- Safety check - make sure this is actually a creature we handle
+    print(ent:GetClass(),CREATURE_LOOT[ent:GetClass()])
     if not CREATURE_LOOT[ent:GetClass()] then return end
     -- Store creature information
     local creaturePos = ent:GetPos()

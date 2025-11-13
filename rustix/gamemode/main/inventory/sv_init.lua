@@ -173,9 +173,8 @@ function meta:TakeItem(item, amount)
         end
     end
 
-    print("Removing")
     if CurrentAmount < amount then
-        print("Not enough wood")
+        self:SendNotification("", NOTIFICATION_REMOVE, "materials/icons/bite.png", "Not enough wood")
         return false
     end
 
