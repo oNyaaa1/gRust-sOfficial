@@ -1,5 +1,5 @@
 local CREATURE_LOOT = {
-    ["npc_rust_chicken"] = {
+    ["sent_chicken"] = {
         health = 100, -- How much damage needed to kill it
         loot = {
             {

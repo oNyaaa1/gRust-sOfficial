@@ -8,9 +8,7 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-Added total amount to image hud
-Fixed Hud on notification removing not showing right amount removed
-Fixed building system - Test System added
+
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")
@@ -18,7 +16,9 @@ util.AddNetworkString("Rust_TableValid")
 hook.Add("PlayerSpawn", "PlayerModelSelector", function(ply)
     if IsValid(ply) then
         ply:SetModel("models/player/spike/rustguy_grust.mdl")
-        ply:SetSkin(0)
+        local rnd = math.random(1,3)
+        ply:SetSkin(rnd)
+        print(rnd)
         ply:SetBodygroup(3, 1)
         if Rust.KeepInventory == false then ply.Inventory = {} end
     end

@@ -22,7 +22,7 @@ end
 
 function ENT:SpawnFunction(ply, tr)
     if not tr.Hit then return end
-    local ent = ents.Create("rust_ore")
+    local ent = ents.Create("rust_ores")
     ent:SetPos(tr.HitPos + tr.HitNormal * 32)
     ent:Spawn()
     ent:Activate()
@@ -32,7 +32,7 @@ end
 function ENT:RecoveryTime(pos)
     timer.Simple(3, function()
         if not util.IsInWorld(pos) then return end
-        local ent = ents.Create("rust_ore")
+        local ent = ents.Create("rust_ores")
         ent:SetPos(pos)
         ent:Spawn()
         ent:Activate()

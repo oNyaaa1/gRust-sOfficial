@@ -57,7 +57,7 @@ end
 
 concommand.Add("spawn_ore", function(ply)
     if not ply:IsAdmin() then return end
-    local ent = ents.Create("rust_ore_spawn")
+    local ent = ents.Create("rust_ores_spawn")
     if IsValid(ent) then
         local tbl = {
             [1] = "models/darky_m/rust/worldmodels/metal_ore.mdl",
@@ -101,7 +101,7 @@ function SpawningSystem.SpawnChickens()
     local positions = FindRandomPlacesOnMap(creatureSpawns)
     local spawnedCount = 0
     for _, pos in pairs(positions) do
-        local ent = ents.Create("npc_rust_chicken")
+        local ent = ents.Create("sent_chicken")
         if IsValid(ent) then
             ent:SetPos(pos)
             ent:Spawn()
@@ -181,7 +181,7 @@ function SpawningSystem.SpawnOrePickups()
     for _, pos in pairs(positions) do
         if not isvector(pos) then continue end
         local lowerPos = pos - Vector(0, 0, 15)
-        local ent = ents.Create("rust_orepickup")
+        local ent = ents.Create("rust_orespickup")
         if IsValid(ent) then
             ent:SetPos(lowerPos)
             ent:SetSkin(math.random(1, 3))
@@ -241,13 +241,14 @@ end
 -- Main spawning function
 function SpawningSystem.SpawnAll()
     Logger("[Spawning] Starting entity spawning on map: " .. game.GetMap())
-    SpawningSystem.SpawnRocks()
+    
     SpawningSystem.SpawnTrees()
     timer.Simple(1, function() SpawningSystem.SpawnChickens() end)
     timer.Simple(2, function() SpawningSystem.SpawnHemp() end)
     timer.Simple(3, function() SpawningSystem.SpawnRoadSigns() end)
     timer.Simple(4, function() SpawningSystem.SpawnOrePickups() end)
     timer.Simple(4.5, function() SpawningSystem.SpawnRecyclers() end)
+    timer.Simple(6, function() SpawningSystem.SpawnRocks() end)
     timer.Simple(5, function() Logger("[Spawning] All entity spawning completed!") end)
 end
 

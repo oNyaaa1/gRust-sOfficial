@@ -17,7 +17,7 @@ local TREE_MODELS = {
 }
 
 local CREATURES_ENTITIES = {
-    ["npc_rust_chicken"] = true
+    ["sent_chicken"] = true
 }
 
 hook.Add("EntityTakeDamage", "gRust.ResourceHits", function(ent, dmg)

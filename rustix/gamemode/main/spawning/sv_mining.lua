@@ -54,7 +54,9 @@ gRust.Mining.MineOres = function(ply, ent, weapon, class)
     local itemData = ITEMS:GetItem(itemClass)
     local itemName = itemData and itemData.Name
     ply:GiveItem(seq.item, reward)
-    ply:SendNotification(itemName, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward)
+    local item = ply:GetItem(seq.item)
+    ply:SendNotification(seq.item, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "(+" .. reward .. "/" .. item["Amount"] .. ")")
+    //ply:SendNotification(itemName, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward)
     if ent.AttacksRock == nil then ent.AttacksRock = 0 end
     ent.AttacksRock = ent.AttacksRock + 10
     if ent.AttacksRock >= 50 then

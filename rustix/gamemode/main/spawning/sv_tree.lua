@@ -1,7 +1,7 @@
 Logger("Loading mining system")
 hook.Add("PlayerSpawn", "FixSpawnShiz", function(ply)
     for k, v in pairs(ents.FindInSphere(ply:GetPos(), 10)) do
-        if v:GetClass() == "rust_ore" then ply:SetPos(v:GetPos() + Vector(v:OBBMins().x, v:OBBMins().y, v:OBBMins().z + 12)) end
+        if v:GetClass() == "rust_ores" then ply:SetPos(v:GetPos() + Vector(v:OBBMins().x, v:OBBMins().y, v:OBBMins().z + 12)) end
     end
 end)
 
@@ -105,7 +105,8 @@ gRust.Mining.MineTrees = function(ply, ent, maxHP, weapon, class)
             local idx = math.min(ent.treeHits, #WOOD_SEQ)
             local reward = math.Round(WOOD_SEQ[idx] * tool.mult)
             ply:GiveItem("Wood", reward)
-            ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward)
+            local item = ply:GetItem("Wood")
+            ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "(+" .. reward .. "/" .. item["Amount"] .. ")")
         end
 
         ent.Hitted = true
@@ -120,6 +121,7 @@ gRust.Mining.MineTrees = function(ply, ent, maxHP, weapon, class)
         local idx = math.min(ent.treeHits, #WOOD_SEQ)
         local reward = math.Round(WOOD_SEQ[idx] * tool.mult)
         ply:GiveItem("Wood", reward)
-        ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward)
+        local item = ply:GetItem("Wood")
+        ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "(+" .. reward .. "/" .. item["Amount"] .. ")")
     end
 end
