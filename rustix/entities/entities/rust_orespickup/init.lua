@@ -42,7 +42,9 @@ function ENT:Use(activator, caller)
     if not self.OreType then return end
     local amount = math.random(self.OreType.amount[1], self.OreType.amount[2])
     if activator:GiveItem(self.OreType.item, amount) then
-        activator:SendNotification(self.OreType.name, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount)
+        //activator:SendNotification(self.OreType.name, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount)
+        local item = ply:GetItem(self.OreType.name)
+		activator:SendNotification(self.OreType.name, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. item["Amount"] .. ")")
         -- Map item names to available sound groups
         local soundMap = {
             ["stone"] = "stone",

@@ -17,6 +17,14 @@ function DoDrop(self, panels, bDoDrop, Command, x, y)
     end
 end
 
+surface.CreateFont("RustHudBig", {
+    font = "Arial",
+    extended = false,
+    size = 20,
+    weight = 2100,
+    bold = true,
+})
+
 local DermaImageButton = {}
 local pnl1 = {}
 local function ClearSlots(tbl2)
@@ -47,6 +55,13 @@ local function ClearSlots(tbl2)
                 else
                     draw.RoundedBox(0, 0, 0, ww, hh, Color(99, 99, 99, 190))
                 end
+
+                if tbl2[i] and tbl2[i].Amount ~= nil then
+                    draw.DrawText(tostring(tbl2[i].Amount), "RustHudBig", ww / 2 + 40, hh - 15, Color(255, 255, 255), TEXT_ALIGN_RIGHT)
+                else
+                    draw.DrawText("", "RustHudBig", ww / 2 + 40, hh - 15, Color(255, 255, 255), TEXT_ALIGN_RIGHT)
+                end
+
             end
 
             grid:AddCell(pnl1[i])
@@ -58,7 +73,7 @@ local function ClearSlots(tbl2)
         if v.Img == nil then continue end
         if pnl1[v.Slotz] == nil then continue end
         DermaImageButton[k] = vgui.Create("DImageButton", pnl1[v.Slotz])
-        DermaImageButton[k]:SetSize(80, 76)
+        DermaImageButton[k]:SetSize(80, 66)
         DermaImageButton[k]:SetPos(0, 0)
         DermaImageButton[k]:SetImage(v.Img)
         DermaImageButton[k]:Droppable("DroppableRust")
@@ -68,12 +83,10 @@ local function ClearSlots(tbl2)
         DermaImageButton[k].OldSlot = v.Slotz
         DermaImageButton[k].Paint = function(s, ww, hh)
             if s:IsHovered() then
-                draw.RoundedBox(0, 0, 0, ww, hh, Color(5, 217, 255, 190))
+                draw.RoundedBox(0, 0, 0, 80, 76, Color(5, 217, 255, 190))
             else
-                draw.RoundedBox(0, 0, 0, ww, hh, Color(99, 99, 99, 190))
+                draw.RoundedBox(0, 0, 0, 80, 76, Color(99, 99, 99, 190))
             end
- 
-            draw.DrawText(tostring(v.Amount), "Default", ww / 2 + 40, hh - 10, Color(0, 0, 0), TEXT_ALIGN_RIGHT)
         end
     end
 end
@@ -110,6 +123,12 @@ function GM:ScoreboardShow()
                 else
                     draw.RoundedBox(0, 0, 0, ww, hh, Color(99, 99, 99, 190))
                 end
+
+                if gRustJas.Inventory[i] and gRustJas.Inventory[i].Amount ~= nil then
+                    draw.DrawText(tostring(gRustJas.Inventory[i].Amount), "RustHudBig", ww / 2 + 40, hh - 15, Color(255, 255, 255), TEXT_ALIGN_RIGHT)
+                else
+                    draw.DrawText("", "RustHudBig", ww / 2 + 40, hh - 15, Color(255, 255, 255), TEXT_ALIGN_RIGHT)
+                end
             end
 
             grid2:AddCell(pnl2[i])
@@ -121,7 +140,7 @@ function GM:ScoreboardShow()
         if v.Img == nil then continue end
         if pnl2[v.Slotz] == nil then continue end
         DermaImageButton[k] = vgui.Create("DImageButton", pnl2[v.Slotz])
-        DermaImageButton[k]:SetSize(80, 80)
+        DermaImageButton[k]:SetSize(80, 66)
         DermaImageButton[k]:SetPos(0, 0)
         DermaImageButton[k]:SetImage(v.Img)
         DermaImageButton[k]:Droppable("DroppableRust")
@@ -131,12 +150,10 @@ function GM:ScoreboardShow()
         DermaImageButton[k].OldSlot = v.Slotz
         DermaImageButton[k].Paint = function(s, ww, hh)
             if s:IsHovered() then
-                draw.RoundedBox(0, 0, 0, ww, hh, Color(5, 217, 255, 190))
+                draw.RoundedBox(0, 0, 0, 80, 76, Color(5, 217, 255, 190))
             else
-                draw.RoundedBox(0, 0, 0, ww, hh, Color(99, 99, 99, 190))
+                draw.RoundedBox(0, 0, 0, 80, 76, Color(99, 99, 99, 190))
             end
-
-            draw.DrawText(tostring(v.Amount), "Default", ww, hh / 2 - 50, Color(0, 0, 0), TEXT_ALIGN_LEFT)
         end
     end
 

@@ -8,7 +8,10 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-
+Rock hits are smoother
+Ores now spawn every 5 mins
+Can now see the amount on the inventory
+GUI hud new
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")
@@ -16,9 +19,8 @@ util.AddNetworkString("Rust_TableValid")
 hook.Add("PlayerSpawn", "PlayerModelSelector", function(ply)
     if IsValid(ply) then
         ply:SetModel("models/player/spike/rustguy_grust.mdl")
-        local rnd = math.random(1,3)
+        local rnd = math.random(1, 3)
         ply:SetSkin(rnd)
-        print(rnd)
         ply:SetBodygroup(3, 1)
         if Rust.KeepInventory == false then ply.Inventory = {} end
     end

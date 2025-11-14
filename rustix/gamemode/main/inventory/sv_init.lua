@@ -101,7 +101,6 @@ function PickleAdillyEdit(ply, wep, amount)
     end
 
     if editmode == true and slotss ~= 0 and CurrentAmount > 0 then
-        print("Editing")
         ply:SetNWFloat(wep, CurrentAmount + amount)
         ply.tbl[slotss] = {
             Slotz = slotss,
@@ -118,7 +117,6 @@ function PickleAdillyEdit(ply, wep, amount)
     end
 
     if adding and amount > 0 then
-        print("Adding")
         ply:SetNWFloat(wep, amount)
         local sloto = FindValidSlotBackWards(ply)
         ply.tbl[sloto] = {

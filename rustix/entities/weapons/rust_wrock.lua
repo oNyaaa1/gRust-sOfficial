@@ -35,16 +35,13 @@ function SWEP:Think()
         tr = util.TraceHull(tr)
         if tr.HitPos:Distance(pl:GetEyeTrace().HitPos) <= 120 and self.Clicked == true then
             local ent = tr.Entity
-            if ent != NULL then
-                local bullet = {}
-                bullet.Num = 1
-                bullet.Src = pl:GetShootPos()
-                bullet.Dir = ent:GetAngles():Forward()
-                bullet.Spread = Vector(0.01, 0.01, 0)
-                bullet.Tracer = 1
-                bullet.Force = 2
-                bullet.Damage = 25
-                ent:FireBullets(bullet)
+            if ent ~= NULL then
+                local dmginfo = DamageInfo()
+                dmginfo:SetDamage(50)
+                dmginfo:SetDamageType(DMG_BULLET)
+                dmginfo:SetAttacker(pl)
+                dmginfo:SetDamageForce(Vector(0, 0, 1000))
+                if SERVER then pl:GetEyeTrace().Entity:TakeDamageInfo(dmginfo) end
             end
 
             self:SendWeaponAnim(ACT_VM_SWINGHIT)

@@ -30,7 +30,7 @@ function ENT:SpawnFunction(ply, tr)
 end
 
 function ENT:RecoveryTime(pos)
-    timer.Simple(3, function()
+    timer.Simple(60 * 5, function()
         if not util.IsInWorld(pos) then return end
         local ent = ents.Create("rust_ores")
         ent:SetPos(pos)
