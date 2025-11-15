@@ -1,12 +1,12 @@
 AddCSLuaFile()
-SWEP.ViewModel = "models/weapons/darky_m/rust/c_ak47u.mdl"
-SWEP.WorldModel = "models/weapons/darky_m/rust/w_ak47u.mdl"
+SWEP.ViewModel = "models/weapons/darky_m/rust/c_m249.mdl"
+SWEP.WorldModel = "models/weapons/darky_m/rust/w_m249.mdl"
 SWEP.DrawCrosshair = false
 SWEP.UseHands = true
 SWEP.Primary.Automatic = true
 SWEP.Primary.ClipSize = 120
 SWEP.Primary.DefaultClip = 30
-SWEP.Primary.Ammo = "AK47_AMMO"
+SWEP.Primary.Ammo = "M249_AMMO"
 function SWEP:Initialize()
     self:SetHoldType("smg")
     self.delay = 0

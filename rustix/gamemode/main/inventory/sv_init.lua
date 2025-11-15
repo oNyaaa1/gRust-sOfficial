@@ -153,7 +153,7 @@ function meta:TakeItem(item, amount)
         print("Cannot find", item, " As an item!")
         return
     end
-
+    local CurrentAmount = 0
     for k, v in pairs(self.tbl) do
         if not istable(v) then continue end
         if v.Weapon == itemz.Name then
@@ -172,7 +172,7 @@ function meta:TakeItem(item, amount)
     end
 
     if CurrentAmount < amount then
-        self:SendNotification("", NOTIFICATION_REMOVE, "materials/icons/bite.png", "Not enough wood")
+        self:SendNotification("", NOTIFICATION_REMOVE, "materials/icons/bite.png", "Not enough " .. itemz.Name)
         return false
     end
 

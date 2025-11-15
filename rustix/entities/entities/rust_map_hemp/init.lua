@@ -25,8 +25,8 @@ function ENT:Use(activator, caller)
 	if activator:GiveItem("Cloth", 10) then
 		activator:EmitSound("ui/items/pickup_cloth_1.wav")
 		--activator:SendNotification("Cloth", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. 10)
-		local item = ply:GetItem("Cloth")
-		activator:SendNotification("Cloth", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. item["Amount"] .. ")")
+		local item = activator:GetItem("Cloth")
+		activator:SendNotification("Cloth", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. 10 .. " (" .. item["Amount"] .. ")")
 		self.CurrentUses = self.CurrentUses + 1
 		if self.CurrentUses >= self.MaxUses then
 			self:Remove() -- Remove hemp permanently instead of respawning

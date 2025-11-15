@@ -18,7 +18,17 @@ function GM:Initialize()
         minsplash = 10,
         maxsplash = 5
     })
-    
+    game.AddAmmoType({
+        name = "M249_AMMO", -- '#BULLET_PLAYER_556MM_ammo'
+        dmgtype = DMG_BULLET,
+        tracer = TRACER_LINE,
+        plydmg = 30,
+        npcdmg = 30,
+        force = 2000,
+        maxcarry = 120,
+        minsplash = 10,
+        maxsplash = 5
+    })
 end
 
 local IncludeDir = IncludeDir or {}

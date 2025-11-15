@@ -8,10 +8,14 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-Rock hits are smoother
-Ores now spawn every 5 mins
-Can now see the amount on the inventory
-GUI hud new
+Fixed not being able to pick up Cloth
+Changed the ak47 sound
+Fixed not being able to pick up ores
+Added Backpack under Deeznuts xD [Under maintenance]
+Fixed random hitting of the rock when not attacking
+Added Reload on ak47 (Atm takes no bullets)
+Added M249
+Fixed popup of stuff not working if u didnt have the correct amount of items
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")

@@ -20,6 +20,7 @@ function SWEP:PrimaryAttack()
     self:SetNextPrimaryFire(CurTime() + 1.5)
     local tr = pl:GetEyeTrace()
     self.Clicked = true
+    timer.Simple(0.5, function() self.Clicked = false end)
 end
 
 function SWEP:Think()
