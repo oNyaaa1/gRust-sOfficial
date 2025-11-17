@@ -106,7 +106,7 @@ function PickleAdillyEdit(ply, wep, amount)
             Slotz = slotss,
             Weapon = wep,
             Img = itemz.model,
-            Amount = math.Clamp(CurrentAmount + amount, 0, itemz.StackSize),
+            Amount = math.Clamp(CurrentAmount + amount or 0, 0, itemz.StackSize or 1000),
             SlotFree = false,
         }
 
@@ -123,7 +123,7 @@ function PickleAdillyEdit(ply, wep, amount)
             Slotz = sloto,
             Weapon = wep,
             Img = itemz.model,
-            Amount = math.Clamp(amount, 0, itemz.StackSize),
+            Amount = math.Clamp(amount or 0, 0, itemz.StackSize),
             SlotFree = false,
         }
 
@@ -153,6 +153,7 @@ function meta:TakeItem(item, amount)
         print("Cannot find", item, " As an item!")
         return
     end
+
     local CurrentAmount = 0
     for k, v in pairs(self.tbl) do
         if not istable(v) then continue end
@@ -250,7 +251,7 @@ end)
 
 hook.Add("PlayerSpawn", "GiveITem", function(ply)
     PickleAdillyEdit(ply, "Rock", 1)
-    PickleAdillyEdit(ply, "AK47", 1)
+    //PickleAdillyEdit(ply, "AK47", 1)
     ply:Give("rust_hands")
     ply:SetNWInt("Hunger", math.random(90, 120))
     ply:SetNWInt("Thirst", math.random(90, 100))

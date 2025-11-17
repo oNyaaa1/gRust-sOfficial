@@ -131,7 +131,11 @@ local function RightPanelInfo(pnl, ITEM)
         draw.DrawText("CRAFT", "CraftingRustFont", 110, 25, Color(255, 255, 255, 255), TEXT_ALIGN_LEFT)
     end
 
-    Buttonzz.DoClick = function() net.Start("BuildingCrafting") net.WriteString(ITEM.Name) net.SendToServer() end
+    Buttonzz.DoClick = function()
+        net.Start("BuildingCrafting")
+        net.WriteString(ITEM.Name)
+        net.SendToServer()
+    end
     return dpanel2
 end
 

@@ -1,65 +1,49 @@
 local scrw, scrh = ScrW(), ScrH()
-
 local Spacing = scrh * 0.002
 local Padding = scrh * 0.0035
-
-local Width, Height = scrh * 0.266, (scrh * 0.1125 - Spacing) / 3
+local Width, Height = scrh * 0.245, (scrh * 0.135 - Spacing) / 3
 local Margin = scrh * 0.0225
 local Tall = scrh * 0.6
-
 surface.CreateFont("MyAweomseRustHud", {
-	font = "Arial",
-	extended = false,
-	size = 20,
-	weight = 2100,
+    font = "Arial",
+    extended = false,
+    size = 20,
+    weight = 2100,
     bold = true,
 })
 
 function gRust.ReloadNotifications()
-    if (IsValid(gRust.NotificationPanel)) then
-        gRust.NotificationPanel:Remove()
-    end
-
+    if IsValid(gRust.NotificationPanel) then gRust.NotificationPanel:Remove() end
     local Panel = vgui.Create("Panel")
     Panel:SetPos(scrw - Width - Margin, scrh - (Height * 3) - Padding * 2 - Margin - Tall)
     Panel:SetSize(Width, Tall)
     Panel:NoClipping(true)
-    
     gRust.NotificationPanel = Panel
 end
 
 local InAnimTime = 0.175
 local OutAnimTime = 0.25
-
 function gRust.RepositionNotifications()
-    if (!IsValid(gRust.NotificationPanel)) then return end
-    
+    if not IsValid(gRust.NotificationPanel) then return end
     local children = gRust.NotificationPanel:GetChildren()
-    
     for i = #children, 1, -1 do
-        if (!IsValid(children[i])) then
-            table.remove(children, i)
-        end
+        if not IsValid(children[i]) then table.remove(children, i) end
     end
-    
+
     for i, panel in ipairs(children) do
-        if (IsValid(panel)) then
+        if IsValid(panel) then
             local newY = Tall - (Height * i) - (Spacing * (i - 1))
             panel.StartY = newY + Height
             panel:SetZPos(100 - i)
-            
             panel:MoveTo(0, newY, 0.2, 0)
         end
     end
 end
 
 function gRust.AddNotification(value, type, icon, side)
-    if (isfunction(side)) then
-        side = side()
-    end
-
+    if isfunction(side) then side = side() end
     local Type = gRust.NotificationTypes[type]
-    if (!Type) then
+    if not Type then
         error("Tried to create unknown notification type: " .. type)
         return
     end
@@ -67,9 +51,7 @@ function gRust.AddNotification(value, type, icon, side)
     local Panel = gRust.NotificationPanel:Add("Panel")
     Panel:SetTall(Height)
     Panel:SetWide(Width)
-
     local NotifCount = #gRust.NotificationPanel:GetChildren()
-
     local newY = Tall - (Height * NotifCount) - (Spacing * (NotifCount - 1))
     Panel.StartY = newY + Height
     Panel:SetZPos(100 - NotifCount)
@@ -77,13 +59,11 @@ function gRust.AddNotification(value, type, icon, side)
     Panel:SetPos(0, Panel.StartY)
     Panel:MoveTo(0, newY, InAnimTime, 0)
     Panel:AlphaTo(255, InAnimTime, 0)
-
     Panel.Start = SysTime()
     Panel.Value = string.upper(value)
     Panel.Side = side
     Panel.NotificationType = type
     Panel.Icon = icon
-
     if type == NOTIFICATION_CRAFT then
         Panel.IconAngle = 0
         Panel.IconSize = Height * 0.6
@@ -92,49 +72,37 @@ function gRust.AddNotification(value, type, icon, side)
     Panel.Close = function(me)
         me:AlphaTo(0, OutAnimTime, 0)
         me:MoveTo(0, me.StartY, OutAnimTime, 0, -1, function()
-            if (IsValid(me)) then
-                me:Remove()
-            end
-            timer.Simple(0.01, function()
-                if (IsValid(gRust.NotificationPanel)) then
-                    gRust.RepositionNotifications()
-                end
-            end)
+            if IsValid(me) then me:Remove() end
+            timer.Simple(0.01, function() if IsValid(gRust.NotificationPanel) then gRust.RepositionNotifications() end end)
         end)
     end
 
     Panel.Paint = function(me, w, h)
         surface.SetDrawColor(Type.Color)
         surface.DrawRect(0, 0, w, h)
-
         if type == NOTIFICATION_CRAFT then
             local iconToUse = Type.Icon
-            
             if iconToUse then
                 surface.SetDrawColor(Type.IconColor)
                 surface.SetMaterial(iconToUse)
-                
                 local iconSize = me.IconSize or h
                 local centerX = iconSize / 2
                 local centerY = h / 2
-                
                 local matrix = Matrix()
                 matrix:Translate(Vector(centerX, centerY, 0))
                 matrix:Rotate(Angle(0, 0, me.IconAngle))
                 matrix:Translate(Vector(-centerX, -centerY, 0))
-                
                 cam.PushModelMatrix(matrix)
                 surface.DrawTexturedRect(0, 0, iconSize, iconSize)
                 cam.PopModelMatrix()
             end
-            
+
             draw.SimpleText(me.Value, "MyAweomseRustHud", (me.IconSize or h) + Spacing, h * 0.5, Color(255, 255, 255, 255), 0, 1)
             draw.SimpleText(me.Side, "MyAweomseRustHud", w - Padding * 3, h * 0.5, Color(255, 255, 255, 255), 2, 1)
-        
         else
-            if (me.Icon and me.Icon != "") then
+            if me.Icon and me.Icon ~= "" then
                 local iconMat = Material(me.Icon)
-                if (iconMat and not iconMat:IsError()) then
+                if iconMat and not iconMat:IsError() then
                     surface.SetDrawColor(Type.IconColor or Color(255, 255, 255))
                     surface.SetMaterial(iconMat)
                     surface.DrawTexturedRect(0, 0, h, h)
@@ -151,35 +119,25 @@ function gRust.AddNotification(value, type, icon, side)
     end
 
     Panel.Think = function(me)
-        if (Type.Think) then
-            Type.Think(me)
-        end
-
+        if Type.Think then Type.Think(me) end
         if type == NOTIFICATION_CRAFT then
             me.IconAngle = (me.IconAngle + FrameTime() * 12) % 360
+            timer.Simple(1, function() if IsValid(me) then me:Close() end end)
         end
 
-        if (Type.Time and me.Start + Type.Time < SysTime()) then
-            me:Close()
-        end
+        if Type.Time and me.Start + Type.Time < SysTime() then me:Close() end
     end
 end
 
 function gRust.ClearNotifications(notificationType)
-    if (!IsValid(gRust.NotificationPanel)) then return end
-    
+    if not IsValid(gRust.NotificationPanel) then return end
     local panelsToClose = {}
-    
     for _, panel in pairs(gRust.NotificationPanel:GetChildren()) do
-        if (notificationType == 0 or panel.NotificationType == notificationType) then
-            table.insert(panelsToClose, panel)
-        end
+        if notificationType == 0 or panel.NotificationType == notificationType then table.insert(panelsToClose, panel) end
     end
 
     for _, panel in pairs(panelsToClose) do
-        if (IsValid(panel)) then
-            panel:Close()
-        end
+        if IsValid(panel) then panel:Close() end
     end
 end
 
@@ -188,7 +146,6 @@ net.Receive("gRust.Notify", function()
     local notificationType = net.ReadUInt(4)
     local icon = net.ReadString()
     local side = net.ReadString()
-    
     gRust.AddNotification(text, notificationType, icon, side)
 end)
 
@@ -198,3 +155,35 @@ net.Receive("gRust.ClearNotifications", function()
 end)
 
 gRust.ReloadNotifications()
+local Timer = -1
+local str = ""
+net.Receive("crafting_Gear", function()
+    str = net.ReadString()
+    Timer = net.ReadFloat()
+end)
+
+hook.Add("HUDPaint", "WTFCRafting", function()
+    if Timer <= 0 then return end
+    local master = gRust.NotificationTypes[NOTIFICATION_CRAFT]
+    if master.IconAngle == nil then master.IconAngle = 0 end
+    local Width2, Height2 = scrh * 0.24, (scrh * 0.1125 - Spacing) / 3
+    local poxW, poxH = scrw * 0.849, scrh * 0.84
+    local IconToUSe = master.Icon
+    surface.SetDrawColor(master.Color)
+    surface.DrawRect(poxW, poxH, Width2, Height2)
+    surface.SetDrawColor(master.IconColor)
+    surface.SetMaterial(IconToUSe)
+    local iconSize = Height2 * 0.8
+    local centerX = iconSize / 2
+    local centerY = Height2 / 2 * 0
+    local matrix = Matrix()
+    master.IconAngle = (master.IconAngle + FrameTime() * 360) % 360
+    matrix:Translate(Vector(centerX * 103.5, centerY + 760, 0))
+    matrix:Rotate(Angle(0, master.IconAngle, 0))
+    matrix:Translate(Vector(-centerX, -centerY, 0))
+    cam.PushModelMatrix(matrix)
+    surface.DrawTexturedRect(0, 0, iconSize, iconSize)
+    cam.PopModelMatrix()
+    draw.SimpleText(str, "MyAweomseRustHud", poxW + 40, poxH + 15, Color(255, 255, 255, 255), 0, 1)
+    draw.SimpleText("Time:" .. tostring(Timer), "MyAweomseRustHud", poxW * 1.150, poxH + 15, Color(255, 255, 255, 255), 2, 1)
+end)
