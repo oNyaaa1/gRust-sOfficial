@@ -5,7 +5,7 @@ ENT.PrintName = "Foundation"
 ENT.Category = ""
 ENT.Spawnable = true
 ENT.AdminOnly = false
-ENT.Models = "models/building_re/twig_foundation.mdl"
+ENT.Models = "models/building_re/wood_foundation.mdl"
 if SERVER then
     function ENT:Initialize()
         self.Entity:SetModel(self.Models)

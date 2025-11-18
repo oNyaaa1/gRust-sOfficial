@@ -8,11 +8,36 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
+Updated hammer
+Updated crafting
+Upgrading is a test atm!
 
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")
 util.AddNetworkString("Rust_TableValid")
+local valid = {
+    ["sent_foundation"] = true
+}
+
+net.Receive("gRust_ServerModel_new", function(len, ply)
+    local msg = net.ReadString()
+    if msg == "Wood" then
+        local eye_t_e = ply:GetEyeTrace().Entity
+        if not valid[eye_t_e:GetClass()] then return end
+        local ent = eye_t_e
+        local new_ent = ents.Create("sent_foundation")
+        new_ent:SetPos(ent:GetPos())
+        new_ent:SetAngles(ent:GetAngles())
+        new_ent:Spawn()
+        new_ent:Activate()
+        new_ent:SetMaxHealth(250)
+        new_ent:SetHealth(250)
+        ent:Remove()
+        ply:EmitSound("zohart/building/hammer-saw-" .. math.random(1, 3) .. ".wav")
+    end
+end)
+
 hook.Add("PlayerSpawn", "PlayerModelSelector", function(ply)
     if IsValid(ply) then
         ply:SetModel("models/player/spike/rustguy_grust.mdl")

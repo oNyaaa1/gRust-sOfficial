@@ -11,7 +11,13 @@ surface.CreateFont("MyAweomseRustHud", {
     weight = 2100,
     bold = true,
 })
-
+surface.CreateFont("CraftingHudStylex", {
+    font = "Arial",
+    extended = false,
+    size = 16,
+    weight = 2100,
+    bold = true,
+})
 function gRust.ReloadNotifications()
     if IsValid(gRust.NotificationPanel) then gRust.NotificationPanel:Remove() end
     local Panel = vgui.Create("Panel")
@@ -184,6 +190,6 @@ hook.Add("HUDPaint", "WTFCRafting", function()
     cam.PushModelMatrix(matrix)
     surface.DrawTexturedRect(0, 0, iconSize, iconSize)
     cam.PopModelMatrix()
-    draw.SimpleText(str, "MyAweomseRustHud", poxW + 40, poxH + 15, Color(255, 255, 255, 255), 0, 1)
-    draw.SimpleText("Time:" .. tostring(Timer), "MyAweomseRustHud", poxW * 1.150, poxH + 15, Color(255, 255, 255, 255), 2, 1)
+    draw.SimpleText(str, "CraftingHudStylex", poxW + 140, poxH + 10, Color(255, 255, 255, 255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_RIGHT)
+    draw.SimpleText("Time:" .. tostring(Timer), "MyAweomseRustHud", poxW * 1.150, poxH + 10, Color(255, 255, 255, 255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_RIGHT)
 end)

@@ -4,7 +4,7 @@ ITEMS:RegisterItem("Low Grade Fuel", {
     Category = "Resources",
     model = "materials/items/resources/low_grade_fuel.png",
     Weapon = "",
-    Count = 5,
+    Count = 30,
     Stackable = true,
     StackSize = 150,
     IzAdmin = true,

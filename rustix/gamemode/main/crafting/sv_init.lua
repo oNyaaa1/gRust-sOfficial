@@ -7,20 +7,20 @@ net.Receive("BuildingCrafting", function(len, pl)
     local wep = itemz.Name
     local timerz = itemz:Craft()[1].Time
     local bool
+    if timer.Exists("TimerForCraft" .. tostring(pl:SteamID64())) then return end
     for k, v in pairs(itemz:Craft()) do
         bool = pl:TakeItem(v[k].ITEM, v[k].AMOUNT)
     end
 
     if not bool then return end
     pl.reached = timerz
-    if timer.Exists("TimerForCraft" .. tostring(pl:SteamID64())) then return end
+    
     timer.Create("TimerForCraft" .. tostring(pl:SteamID64()), 1, 0, function()
         pl.reached = pl.reached - 1
         net.Start("crafting_Gear")
         net.WriteString(wep)
         net.WriteFloat(pl.reached)
         net.Send(pl)
-        print(timerz, pl.reached)
         if pl.reached <= 0 then
             pl.reached = nil
             timer.Remove("TimerForCraft" .. tostring(pl:SteamID64()))
