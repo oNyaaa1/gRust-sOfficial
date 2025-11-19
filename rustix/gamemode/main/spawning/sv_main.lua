@@ -17,7 +17,7 @@ local TREE_MODELS = {
 }
 
 local CREATURES_ENTITIES = {
-    ["sent_chicken"] = true
+    ["npc_deer"] = true
 }
 
 hook.Add("EntityTakeDamage", "gRust.ResourceHits", function(ent, dmg)
@@ -28,13 +28,11 @@ hook.Add("EntityTakeDamage", "gRust.ResourceHits", function(ent, dmg)
     local class = wep:GetClass()
     local maxHP = TREE_MODELS[ent:GetModel()]
     local isCreature = CREATURES_ENTITIES[ent:GetClass()]
-    if ent:GetClass() == "sent_chicken" and ent:Health() <= 25 then
-        print(ent:GetClass())
-        print(ent:Health())
+    if ent:GetClass() == "npc_deer" and ent:Health() <= 25 then
         gRust.Mining.SpawnCreatureCorpse(ent)
     end
 
-    if ent:GetClass() == "rust_creature_corpse" then gRust.Mining.MineCreatures(ply, ent, weapon, class) end
+    if ent:GetClass() == "prop_ragdoll" then gRust.Mining.MineCreatures(ply, ent, weapon, class) end
     if ent:GetClass() == "rust_ores" then
         local validTool = gRust.Mining.IsValidMiningTool(class)
         if not validTool then return true end

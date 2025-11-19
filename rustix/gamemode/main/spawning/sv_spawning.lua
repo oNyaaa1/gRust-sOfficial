@@ -101,18 +101,18 @@ function SpawningSystem.SpawnChickens()
     local positions = FindRandomPlacesOnMap(creatureSpawns)
     local spawnedCount = 0
     for _, pos in pairs(positions) do
-        local ent = ents.Create("sent_chicken")
+        local ent = ents.Create("npc_deer")
         if IsValid(ent) then
             ent:SetPos(pos)
             ent:Spawn()
             ent:Activate()
-            ent:SetModelScale(1.75, 0)
+            //ent:SetModelScale(1.75, 0)
             ent:DropToFloor()
             spawnedCount = spawnedCount + 1
         end
     end
 
-    Logger("[Spawning] Spawned " .. spawnedCount .. " chickens")
+    Logger("[Spawning] Spawned " .. spawnedCount .. " deer")
 end
 
 function SpawningSystem.SpawnTrees()
@@ -124,7 +124,7 @@ function SpawningSystem.SpawnTrees()
             ent:SetPos(pos - Vector(0, 0, 50))
             ent:Spawn()
             ent:Activate()
-            ent:SetModelScale(1.75, 0)
+            //ent:SetModelScale(1.75, 0)
             ent:DropToFloor()
             spawnedCount = spawnedCount + 1
             local trace = util.TraceLine({

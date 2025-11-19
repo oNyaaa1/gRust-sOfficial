@@ -37,12 +37,7 @@ function SWEP:Think()
         if tr.HitPos:Distance(pl:GetEyeTrace().HitPos) <= 120 and self.Clicked == true then
             local ent = tr.Entity
             if ent ~= NULL then
-                local dmginfo = DamageInfo()
-                dmginfo:SetDamage(50)
-                dmginfo:SetDamageType(DMG_BULLET)
-                dmginfo:SetAttacker(pl)
-                dmginfo:SetDamageForce(Vector(0, 0, 1000))
-                if SERVER then pl:GetEyeTrace().Entity:TakeDamageInfo(dmginfo) end
+                self:ShootBullet(25, 1, 0, "", 0, 1)
             end
 
             self:SendWeaponAnim(ACT_VM_SWINGHIT)

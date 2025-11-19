@@ -1,5 +1,5 @@
 local CREATURE_LOOT = {
-    ["sent_chicken"] = {
+    ["prop_ragdoll"] = {
         health = 100, -- How much damage needed to kill it
         loot = {
             {
@@ -22,7 +22,6 @@ local CREATURE_LOOT = {
 local function MakeCreatureCorpse(ent, damageForce)
     if not IsValid(ent) then return end
     -- Safety check - make sure this is actually a creature we handle
-    print(ent:GetClass(),CREATURE_LOOT[ent:GetClass()])
     if not CREATURE_LOOT[ent:GetClass()] then return end
     -- Store creature information
     local creaturePos = ent:GetPos()
@@ -42,27 +41,25 @@ local function MakeCreatureCorpse(ent, damageForce)
     local groundPos = trace.Hit and trace.HitPos or creaturePos
     groundPos = groundPos + Vector(0, 0, 10) -- Lift 10 units above ground
     -- Create a creature corpse entity (like in Rust)
-    local corpse = ents.Create("rust_creature_corpse")
+    local corpse = ents.Create("prop_ragdoll")
     if not IsValid(corpse) then return end
     corpse:SetModel(creatureModel)
     corpse:SetPos(groundPos)
     corpse:SetAngles(creatureAngles)
     -- Try spawning with error handling
-    local success, err = pcall(function()
-        corpse:Spawn()
-        corpse:Activate()
-        corpse:DropToFloor()
-    end)
-
+    corpse:Spawn()
+    corpse:Activate()
+    corpse:DropToFloor()
     if not success then
         if IsValid(corpse) then corpse:Remove() end
         return
     end
 
     -- Set up the corpse with proper health and type
+    corpse.Healths = CREATURE_LOOT[creatureClass].health
     corpse:SetHealth(CREATURE_LOOT[creatureClass].health)
     corpse:SetMaxHealth(CREATURE_LOOT[creatureClass].health)
-    corpse:SetCreatureType(creatureClass)
+    --corpse:SetCreatureType(creatureClass)
     -- Make it fall down and settle properly
     local phys = corpse:GetPhysicsObject()
     if IsValid(phys) then
@@ -83,13 +80,13 @@ local function MakeCreatureCorpse(ent, damageForce)
                 local finalGroundTrace = util.TraceLine(finalTrace)
                 if finalGroundTrace.Hit then corpse:SetPos(finalGroundTrace.HitPos + Vector(0, 0, 5)) end
                 phys:EnableMotion(false)
-                corpse:SetMoveType(MOVETYPE_NONE)
+                corpse:SetMoveType(MOVETYPE_VPHYSICS)
                 corpse:SetSolid(SOLID_VPHYSICS)
             end
         end)
     else
         -- If no physics, just make sure it's positioned correctly
-        corpse:SetMoveType(MOVETYPE_NONE)
+        corpse:SetMoveType(MOVETYPE_VPHYSICS)
         corpse:SetSolid(SOLID_VPHYSICS)
     end
 
@@ -103,20 +100,25 @@ local function MakeCreatureCorpse(ent, damageForce)
 end
 
 -- Expose function for external use
-gRust.Mining.SpawnCreatureCorpse = function(ent) print(ent) return MakeCreatureCorpse(ent) end
+gRust.Mining.SpawnCreatureCorpse = function(ent)
+    print(ent)
+    return MakeCreatureCorpse(ent)
+end
+
 gRust.Mining.MineCreatures = function(ply, ent, weapon, class)
     if not ply.Wood_Cutting_Tool then ply.Wood_Cutting_Tool = 0 end
     if ply.Wood_Cutting_Tool > CurTime() then return end
     ply.Wood_Cutting_Tool = CurTime() + 0.2
     -- Only handle creature corpses
-    if ent:GetClass() == "rust_creature_corpse" then
-        local creatureType = ent:GetCreatureType()
-        local creatureData = CREATURE_LOOT[creatureType]
+    if ent:GetClass() == "prop_ragdoll" then
+        --local creatureType = ent:GetCreatureType()
+        local creatureData = CREATURE_LOOT["prop_ragdoll"]
         if not creatureData then return end
         -- Reduce health using rust_base system
-        local currentHealth = ent:Health()
-        local newHealth = currentHealth - 10
-        ent:SetHealth(newHealth)
+        print(ent)
+        if ent.Healths == nil then ent.Healths = 250 end
+        ent.Healths = ent.Healths - 25
+        print(ent.Healths)
         -- Give loot only from corpses
         for _, lootItem in pairs(creatureData.loot) do
             local amount = math.random(lootItem.min, lootItem.max)
@@ -125,6 +127,6 @@ gRust.Mining.MineCreatures = function(ply, ent, weapon, class)
         end
 
         -- Remove corpse when fully mined
-        if newHealth <= 0 then ent:Remove() end
+        if  ent.Healths  <= 0 then ent:Remove() end
     end
 end
