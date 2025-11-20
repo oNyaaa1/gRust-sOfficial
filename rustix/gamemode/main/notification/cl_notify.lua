@@ -7,7 +7,7 @@ local Tall = scrh * 0.6
 surface.CreateFont("MyAweomseRustHud", {
     font = "Arial",
     extended = false,
-    size = 20,
+    size = 17,
     weight = 2100,
     bold = true,
 })

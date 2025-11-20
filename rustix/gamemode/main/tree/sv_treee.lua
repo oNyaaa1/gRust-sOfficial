@@ -33,17 +33,17 @@ local function SendTreeHit(ply, ent)
 
     local tr = ply:GetEyeTrace()
     if not tr.Hit or tr.Entity ~= ent then return end
-    local hitPos = tr.HitPos
-    local radius = 1
+    if ent.HitPos == nil then ent.HitPos = tr.HitPos end
+    local radius = 3
     local randomOffset = VectorRand() * radius
     randomOffset.x = math.Rand(-5, 5)
     randomOffset.y = math.random(-1, 1)
-    hitPos = hitPos + ent:OBBCenter() * radius * Vector(2, 2, 2) --randomOffset
-    if ent.LastPos == nil then ent.LastPos = hitPos end
+    ent.HitPos = ent.HitPos + ent:OBBCenter() * radius * Vector(1) --randomOffset
+    if ent.LastPos == nil then ent.LastPos = ent.HitPos end
     local dist = tr.HitPos:Distance(ent.LastPos)
     if not ent.NoMarker then
-        ent.HotspotPos = hitPos
-        ent.LastPos = hitPos
+        ent.HotspotPos = ent.HitPos
+        ent.LastPos = ent.HitPos
         net.Start("gRust.TreeEffects")
         net.WriteVector(ent.LastPos)
         net.WriteAngle(Angle(ply:GetAngles().x, ply:GetAngles().y, ply:GetAngles().z))
@@ -51,15 +51,16 @@ local function SendTreeHit(ply, ent)
         net.Broadcast()
         ent.NoMarker = true
     end
-
-    if dist <= 10 then
-        ent.HotspotPos = hitPos
-        ent.LastPos = hitPos
+    print(dist <= 30)
+    if dist <= 30 then
+        ent.HotspotPos = ent.HitPos
+        ent.LastPos = ent.HitPos
         net.Start("gRust.TreeEffects")
         net.WriteVector(ent.LastPos)
         net.WriteAngle(Angle(ply:GetAngles().x, ply:GetAngles().y, ply:GetAngles().z))
         net.WriteEntity(ent)
         net.Broadcast()
+        ply:EmitSound("combat/hitmarker.wav")
     end
 end
 
@@ -152,12 +153,12 @@ local TREE_MODELS = {
 
 local WOOD_SEQ = {6, 14, 22, 32, 43, 55, 68, 83, 99, 128}
 hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
-    /*local MAT = BackwardsEnums("MAT_")
+    local MAT = BackwardsEnums("MAT_")
     local ply = dmginfo:GetAttacker()
     if not IsValid(ply) then return end
     local wep = ply:GetActiveWeapon() --if not IsValid(ply) then return end
     if not IsValid(wep) then return end
-    local found = string.find(wep:GetClass(), "hatchet") or string.find(wep:GetClass(), "pickaxe") or string.find(wep:GetClass(), "rock")
+    local found = string.find(wep:GetClass(), "hatchet") or string.find(wep:GetClass(), "pickaxe") or string.find(wep:GetClass(), "wrock")
     if ent.treeFallen == nil then ent.treeFallen = false end
     if found and MAT[ent:GetMaterialType()] == "MAT_WOOD" and ent.treeFallen == false then
         if not ply:IsPlayer() then return end
@@ -172,6 +173,7 @@ hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
         local reward = math.Round(WOOD_SEQ[idx] * tool.mult)
         ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward)
         PickleAdillyEdit(ply, "Wood", 300)
+        
         if ent.treeHealth <= 0 then
             --SendTreeHit(ply, nil)
             --MakeTreeFall(ent)
@@ -180,5 +182,5 @@ hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
     end
 
     SendTreeHit(ply, ent)
-    if ent:GetClass() == "sent_rocks" then end*/
+    if ent:GetClass() == "sent_rocks" then end
 end)

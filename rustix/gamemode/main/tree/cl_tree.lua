@@ -6,24 +6,23 @@ net.Receive("gRust_Amount", function()
 end)
 
 local tree = Material("tree/treemarker.png", "noclamp smooth")
+local decal = Material("tree/treemarker.png")
 local hitPos = nil
 local Angles = nil
 local Ent = nil
 local function TreeEffects(len)
-    HitPos1 = net.ReadVector() or nil
+    hitPos = net.ReadVector() or nil
     Angles = net.ReadAngle() or nil
     Ent = net.ReadEntity() or nil
-    print("test")
-    local decal = util.DecalMaterial("tree/treemarker.png")
     local tr = LocalPlayer():GetEyeTrace()
-    print(tr.HitPos)
-    util.DecalEx(decal, Ent, tr.HitPos, tr.HitPos, Color(0, 255, 0), 2, 2)
+    util.Decal("Cross", tr.HitPos, tr.HitPos, {LocalPlayer()})
 end
 
 net.Receive("gRust.TreeEffects", TreeEffects)
 hook.Add("PostDrawOpaqueRenderables", "DrawTreeXMarker", function()
     if not hitPos then return end
-    if not Ent then return end
+    if not IsValid(Ent) then return end
+    util.DecalEx(decal, Ent, hitPos, hitPos:GetNormalized(), Color(0, 255, 0), 0.1, 0.1)
     --cam.Start3D2D(hitPos, Angles - Angle(90, 0, 0), 1)
     --surface.SetMaterial(tree)
     --surface.SetDrawColor(color_white)

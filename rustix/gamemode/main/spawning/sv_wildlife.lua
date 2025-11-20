@@ -101,7 +101,6 @@ end
 
 -- Expose function for external use
 gRust.Mining.SpawnCreatureCorpse = function(ent)
-    print(ent)
     return MakeCreatureCorpse(ent)
 end
 
@@ -115,10 +114,9 @@ gRust.Mining.MineCreatures = function(ply, ent, weapon, class)
         local creatureData = CREATURE_LOOT["prop_ragdoll"]
         if not creatureData then return end
         -- Reduce health using rust_base system
-        print(ent)
         if ent.Healths == nil then ent.Healths = 250 end
         ent.Healths = ent.Healths - 25
-        print(ent.Healths)
+        ent:SetHealth(ent.Healths)
         -- Give loot only from corpses
         for _, lootItem in pairs(creatureData.loot) do
             local amount = math.random(lootItem.min, lootItem.max)

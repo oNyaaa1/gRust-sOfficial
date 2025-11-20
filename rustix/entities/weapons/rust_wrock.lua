@@ -30,7 +30,7 @@ function SWEP:Think()
         self.delay = CurTime() + 0.5
         local tr = {
             start = pl:EyePos(),
-            endpos = pl:EyePos() + pl:GetAimVector() * 30
+            endpos = pl:EyePos() + pl:GetAimVector() * 60
         }
 
         tr = util.TraceHull(tr)

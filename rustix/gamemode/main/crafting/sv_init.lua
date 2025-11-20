@@ -28,7 +28,7 @@ net.Receive("BuildingCrafting", function(len, pl)
         end
     end)
 
-    timer.Simple(timerz, function() pl:GiveItem(wep, 1) end)
+    timer.Simple(timerz, function() pl:GiveItem(wep, itemz.Count) end)
 end)
 
 hook.Add("PlayerDeath", "PDRESET", function(ply, inf, attk)
