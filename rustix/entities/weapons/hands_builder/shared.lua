@@ -149,13 +149,22 @@ if CLIENT then
     net.Receive("Rust_TableValid", function() tbl = net.ReadTable() end)
     function SWEP:Think()
         if SERVER then return end
-        if Rust.GhostEntity == nil and Rust.Selected ~= nil then Rust.GhostEntity = ents.CreateClientProp(Rust.Nests[Rust.Selected].Model) end
-        if not IsValid(Rust.GhostEntity) then
+        if not IsFirstTimePredicted() then return end
+        if Rust.Selected == nil then
+            Rust.GhostEntity:Remove()
             Rust.GhostEntity = nil
-            return
         end
 
-        if not IsValid(Rust.GhostEntity) then return end
+        if not IsValid(Rust.GhostEntity) then
+            Rust.GhostEntity = ents.CreateClientProp()
+            print(Rust.Selected)
+            Rust.GhostEntity:Spawn()
+            Rust.GhostEntity:PhysicsDestroy()
+            Rust.GhostEntity:SetMoveType(MOVETYPE_NONE)
+            Rust.GhostEntity:SetNotSolid(true)
+        end
+
+        Rust.GhostEntity:SetModel(Rust.Nests[Rust.Selected].Model)
         local ply = self:GetOwner()
         if not IsValid(ply) then return end
         local Position = math.Round(360 - ply:GetAngles().y % 360)
@@ -178,10 +187,6 @@ if CLIENT then
 
         if self.Pos then Rust.GhostEntity:SetPos(self.Pos) end
         if self.Ang then Rust.GhostEntity:SetAngles(self.Ang) end
-        Rust.GhostEntity:Spawn()
-        Rust.GhostEntity:PhysicsDestroy()
-        Rust.GhostEntity:SetMoveType(MOVETYPE_NONE)
-        Rust.GhostEntity:SetNotSolid(true)
         if ply:GetPos():Distance(ply:GetEyeTrace().HitPos) >= 130 and Canplace == false then
             Rust.GhostEntity:SetColor(Color(255, 0, 0, 255))
             return
@@ -189,5 +194,8 @@ if CLIENT then
             Rust.GhostEntity:SetColor(Color(47, 47, 255))
             return
         end
+
+        self:SetNextThink(CurTime() + 1)
+        return true
     end
 end

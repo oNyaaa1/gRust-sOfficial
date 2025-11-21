@@ -8,8 +8,6 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-Fixed hitting from far away
-Fixed missing animals and wood etc
 
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
