@@ -8,8 +8,8 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-Fixed serverside lag crafting
-Fixed bugs and exploits
+Fixed hitting from far away
+Fixed missing animals and wood etc
 
 ]]
 util.AddNetworkString("gRust_ServerModel_new")

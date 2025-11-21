@@ -34,7 +34,7 @@ function SWEP:Think()
             filter = {pl}
         })
 
-        if tr.HitPos:Distance(pl:GetEyeTrace().HitPos) <= 120 and self.Clicked == true then
+        if pl:GetPos():Distance(pl:GetEyeTrace().HitPos) <= 120 and self.Clicked == true then
             local ent = tr.Entity
             if ent ~= NULL then self:ShootBullet(25, 1, 0, "", 0, 1) end
             self:SendWeaponAnim(ACT_VM_SWINGHIT)
