@@ -8,9 +8,9 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-Fixed (BuildeR) entity stuck in floor!
-Can no longer build on the sky!
-Added Doorwar + Ceiling!
+Fixed serverside lag crafting
+Fixed bugs and exploits
+
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")

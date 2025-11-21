@@ -20,7 +20,20 @@ function meta:NotifyWood(amount)
     self:SendNotifyMsgLang("WoodReceive", amount)
 end
 
-local function SendTreeHit(ply, ent)
+local WOOD_WEAPONS = {
+    ["rust_wrock"] = {
+        mult = 1
+    },
+    ["rust_stonehatchet"] = {
+        mult = 1.3
+    },
+    ["rust_hatchet"] = {
+        mult = 1.8
+    }
+}
+
+local WOOD_SEQ = {6, 14, 22, 32, 43, 55, 68, 83, 99, 128}
+local function SendTreeHit(ply, ent, class)
     if ent == nil then
         net.Start("gRust.TreeEffects")
         net.WriteVector(Vector())
@@ -51,7 +64,8 @@ local function SendTreeHit(ply, ent)
         ent.NoMarker = true
     end
 
-    if dist <= 30 then
+    print(dist)
+    if dist <= 17 then
         ent.HotspotPos = ent.HitPos
         ent.LastPos = ent.HitPos
         net.Start("gRust.TreeEffects")
@@ -60,6 +74,19 @@ local function SendTreeHit(ply, ent)
         net.WriteEntity(ent)
         net.Broadcast()
         ply:EmitSound("combat/hitmarker.wav")
+        --PickleAdillyEdit(ply, "Wood", reward)
+        local tool = WOOD_WEAPONS[class]
+        local idx = math.min(ent.treeHits, #WOOD_SEQ)
+        local reward = math.Round(WOOD_SEQ[idx] * tool.mult)
+        ply:GiveItem("Wood", reward)
+        local itemz = ply:GetItem("Wood")
+        ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. itemz["Amount"] .. ")")
+    else
+        local idx = math.min(ent.treeHits, #WOOD_SEQ)
+        local reward = math.Round(WOOD_SEQ[idx])
+        ply:GiveItem("Wood", reward)
+        local items = ply:GetItem("Wood")
+        ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. items["Amount"] .. ")")
     end
 end
 
@@ -123,18 +150,6 @@ local function MakeTreeFall(ent)
     end)
 end
 
-local WOOD_WEAPONS = {
-    ["tfa_rustalpha_rocktool"] = {
-        mult = 1
-    },
-    ["rust_stonehatchet"] = {
-        mult = 1.3
-    },
-    ["rust_hatchet"] = {
-        mult = 1.8
-    }
-}
-
 local TREE_MODELS = {
     ["models/props_foliage/ah_super_large_pine002.mdl"] = 220,
     ["models/props_foliage/ah_large_pine.mdl"] = 190,
@@ -150,17 +165,16 @@ local TREE_MODELS = {
     ["models/props_foliage/ah_ash_tree_lg.mdl"] = 190
 }
 
-local WOOD_SEQ = {6, 14, 22, 32, 43, 55, 68, 83, 99, 128}
 hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
     local MAT = BackwardsEnums("MAT_")
     local ply = dmginfo:GetAttacker()
     if not IsValid(ply) then return end
     local wep = ply:GetActiveWeapon() --if not IsValid(ply) then return end
     if not IsValid(wep) then return end
-    local found = string.find(wep:GetClass(), "hatchet") or string.find(wep:GetClass(), "pickaxe") or string.find(wep:GetClass(), "wrock")
+    local found = string.find(wep:GetClass(), "hatchet") or string.find(wep:GetClass(), "pickaxe") or string.find(wep:GetClass(), "rock")
     if ent.treeFallen == nil then ent.treeFallen = false end
-    if found and MAT[ent:GetMaterialType()] == "MAT_WOOD" and ent.treeFallen == false then
-        SendTreeHit(ply, ent)
+    print(found, MAT[ent:GetMaterialType()], ent:GetMaterialType())
+    if found and MAT[ent:GetMaterialType()] == "MAT_WOOD" or MAT[ent:GetMaterialType()] == "MAT_CONCRETE" and ent.treeFallen == false then
         if not ply:IsPlayer() then return end
         local class = wep:GetClass()
         if not class then return end
@@ -170,16 +184,16 @@ hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
         if ent.treeHealth == nil then return end
         ent.treeHealth, ent.treeHits = ent.treeHealth - 20, ent.treeHits + 1
         local idx = math.min(ent.treeHits, #WOOD_SEQ)
-        local reward = math.Round(WOOD_SEQ[idx] * tool.mult)
-        ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward)
-        PickleAdillyEdit(ply, "Wood", 300)
+        local reward = math.Round(WOOD_SEQ[idx])
+        --PickleAdillyEdit(ply, "Wood", reward)
         if ent.treeHealth <= 0 then
             --SendTreeHit(ply, nil)
             --MakeTreeFall(ent)
             -- return
+        else
+            SendTreeHit(ply, ent, class)
         end
     end
 
-    
     if ent:GetClass() == "sent_rocks" then end
 end)

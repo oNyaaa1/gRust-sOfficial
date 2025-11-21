@@ -104,9 +104,9 @@ gRust.Mining.MineTrees = function(ply, ent, maxHP, weapon, class)
         if ent.Hitted == false then
             local idx = math.min(ent.treeHits, #WOOD_SEQ)
             local reward = math.Round(WOOD_SEQ[idx] * tool.mult)
-            ply:GiveItem("Wood", reward)
+            //ply:GiveItem("Wood", reward)
             local item = ply:GetItem("Wood")
-            ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. item["Amount"] .. ")")
+            //ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. item["Amount"] .. ")")
         end
 
         ent.Hitted = true
@@ -118,10 +118,10 @@ gRust.Mining.MineTrees = function(ply, ent, maxHP, weapon, class)
         net.Send(ply)]]
         MakeTreeFall(ent)
     elseif ent.treeHealth > 0 then
-        local idx = math.min(ent.treeHits, #WOOD_SEQ)
+        /*local idx = math.min(ent.treeHits, #WOOD_SEQ)
         local reward = math.Round(WOOD_SEQ[idx] * tool.mult)
         ply:GiveItem("Wood", reward)
         local item = ply:GetItem("Wood")
-        ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. item["Amount"] .. ")")
+        ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. item["Amount"] .. ")")*/
     end
 end

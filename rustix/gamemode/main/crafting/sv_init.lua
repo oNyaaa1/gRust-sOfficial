@@ -25,10 +25,9 @@ net.Receive("BuildingCrafting", function(len, pl)
             pl.reached = nil
             timer.Remove("TimerForCraft" .. tostring(pl:SteamID64()))
             print("Timer Reached")
+            pl:GiveItem(wep, itemz.Count)
         end
     end)
-
-    timer.Simple(timerz, function() pl:GiveItem(wep, itemz.Count) end)
 end)
 
 hook.Add("PlayerDeath", "PDRESET", function(ply, inf, attk)

@@ -137,6 +137,7 @@ end
 local meta = FindMetaTable("Player")
 function meta:GetItem(item)
     for k, v in pairs(self.tbl) do
+        print(item,v.Weapon)
         if item == v.Weapon then return v end
     end
     return nil
