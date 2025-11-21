@@ -33,7 +33,7 @@ function SWEP:Think()
             endpos = pl:EyePos() + pl:GetAimVector() * 60
         }
 
-        tr = util.TraceHull(tr)
+        tr = util.TraceLine(tr)
         if tr.HitPos:Distance(pl:GetEyeTrace().HitPos) <= 120 and self.Clicked == true then
             local ent = tr.Entity
             if ent ~= NULL then
