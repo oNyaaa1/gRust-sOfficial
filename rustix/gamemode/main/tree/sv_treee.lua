@@ -160,6 +160,7 @@ hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
     local found = string.find(wep:GetClass(), "hatchet") or string.find(wep:GetClass(), "pickaxe") or string.find(wep:GetClass(), "wrock")
     if ent.treeFallen == nil then ent.treeFallen = false end
     if found and MAT[ent:GetMaterialType()] == "MAT_WOOD" and ent.treeFallen == false then
+        SendTreeHit(ply, ent)
         if not ply:IsPlayer() then return end
         local class = wep:GetClass()
         if not class then return end
@@ -179,6 +180,6 @@ hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
         end
     end
 
-    SendTreeHit(ply, ent)
+    
     if ent:GetClass() == "sent_rocks" then end
 end)

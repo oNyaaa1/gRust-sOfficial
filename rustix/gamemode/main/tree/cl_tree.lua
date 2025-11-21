@@ -5,7 +5,6 @@ net.Receive("gRust_Amount", function()
     LocalPlayer():ChatPrint(string.format(LANG[gRust.Language][str1], str2))
 end)
 
-local tree = Material("tree/treemarker.png", "noclamp smooth")
 local decal = Material("tree/treemarker.png")
 local hitPos = nil
 local Angles = nil
@@ -14,8 +13,6 @@ local function TreeEffects(len)
     hitPos = net.ReadVector() or nil
     Angles = net.ReadAngle() or nil
     Ent = net.ReadEntity() or nil
-    local tr = LocalPlayer():GetEyeTrace()
-    util.Decal("Cross", tr.HitPos, tr.HitPos, {LocalPlayer()})
 end
 
 net.Receive("gRust.TreeEffects", TreeEffects)

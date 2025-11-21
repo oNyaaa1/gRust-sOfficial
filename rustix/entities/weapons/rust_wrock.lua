@@ -30,7 +30,7 @@ function SWEP:Think()
         self.delay = CurTime() + 0.5
         local tr = util.TraceLine({
             start = pl:GetShootPos(),
-            endpos = pl:GetShootPos() + pl:GetAimVector() * 300,
+            endpos = pl:GetShootPos() + pl:GetAimVector() * 100000,
             filter = {pl}
         })
 
