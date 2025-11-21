@@ -44,10 +44,33 @@ Rust.Nests = {
     },
     ["sent_doorway"] = {
         Class = "sent_doorway",
-        Model = "models/building/twig_foundation.mdl",
+        Model = "models/building_re/twig_dframe.mdl",
+        Pos = function(Position, entOnGround)
+            if Position >= 1 and Position <= 40 or Position >= 320 and Position <= 360 then
+                local Pos = Vector(entOnGround:GetPos().x + 60, entOnGround:GetPos().y, entOnGround:GetPos().z)
+                return Pos, Angle(0, 90, 0)
+            elseif Position > 50 and Position < 120 then
+                local Pos = Vector(entOnGround:GetPos().x, entOnGround:GetPos().y - 60, entOnGround:GetPos().z)
+                return Pos, Angle(0, 0, 0)
+            elseif Position > 146 and Position < 217 then
+                local Pos = Vector(entOnGround:GetPos().x - 60, entOnGround:GetPos().y, entOnGround:GetPos().z)
+                return Pos, Angle(0, 90, 0)
+            elseif Position > 234 and Position < 310 then
+                local Pos = Vector(entOnGround:GetPos().x, entOnGround:GetPos().y + 60, entOnGround:GetPos().z)
+                return Pos, Angle(0, 0, 0)
+            end
+        end,
     },
     ["sent_door"] = {
         Class = "sent_door",
         Model = "models/building/twig_foundation.mdl",
     },
+    ["sent_ceiling"] = {
+        Class = "sent_ceiling",
+        Model = "models/building_re/twig_floor.mdl",
+        Pos = function(Position, entOnGround)
+            local Pos = Vector(entOnGround:GetPos().x, entOnGround:GetPos().y, entOnGround:GetPos().z + 130)
+            return Pos, Angle(0, 0, 0)
+        end,
+    }
 }

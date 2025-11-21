@@ -8,7 +8,9 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-
+Fixed (BuildeR) entity stuck in floor!
+Can no longer build on the sky!
+Added Doorwar + Ceiling!
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")
@@ -23,14 +25,10 @@ net.Receive("gRust_ServerModel_new", function(len, ply)
         local eye_t_e = ply:GetEyeTrace().Entity
         if not valid[eye_t_e:GetClass()] then return end
         local ent = eye_t_e
-        local new_ent = ents.Create("sent_foundation")
-        new_ent:SetPos(ent:GetPos())
-        new_ent:SetAngles(ent:GetAngles())
-        new_ent:Spawn()
-        new_ent:Activate()
-        new_ent:SetMaxHealth(250)
-        new_ent:SetHealth(250)
-        ent:Remove()
+        ent:SetModel("models/building_re/wood_foundation.mdl")
+        ent:SetMaxHealth(250)
+        ent:SetHealth(250)
+        //ent:Remove()
         ply:EmitSound("zohart/building/hammer-saw-" .. math.random(1, 3) .. ".wav")
     end
 end)

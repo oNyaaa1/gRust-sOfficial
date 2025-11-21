@@ -21,7 +21,6 @@ function meta:NotifyWood(amount)
 end
 
 local function SendTreeHit(ply, ent)
-    print(ent)
     if ent == nil then
         net.Start("gRust.TreeEffects")
         net.WriteVector(Vector())
@@ -51,7 +50,7 @@ local function SendTreeHit(ply, ent)
         net.Broadcast()
         ent.NoMarker = true
     end
-    print(dist <= 30)
+
     if dist <= 30 then
         ent.HotspotPos = ent.HitPos
         ent.LastPos = ent.HitPos
@@ -173,7 +172,6 @@ hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
         local reward = math.Round(WOOD_SEQ[idx] * tool.mult)
         ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward)
         PickleAdillyEdit(ply, "Wood", 300)
-        
         if ent.treeHealth <= 0 then
             --SendTreeHit(ply, nil)
             --MakeTreeFall(ent)

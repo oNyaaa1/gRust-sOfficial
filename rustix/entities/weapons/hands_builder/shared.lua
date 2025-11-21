@@ -58,10 +58,10 @@ function SWEP:PrimaryAttack()
     local itemz = ITEMS:GetItem("Wood")
     local bool = false
     for k, v in pairs(itemz:Craft()) do
-        bool = ply:TakeItem(v[k].ITEM, 25)
+        -- bool = ply:TakeItem(v[k].ITEM, 25)
     end
 
-    if not bool then return end
+    --if not bool then return end
     local canPlace = false
     nearEnt = tblOfEnts[1]
     local entOnGround = nearEnt --or ply:GetGroundEntity()
@@ -73,7 +73,7 @@ function SWEP:PrimaryAttack()
         --self.Pos, self.Ang = Rust.Nests[Rust.Selected ~= nil and Rust.Selected or "sent_foundation"].Pos(Position, entOnGround)
         canPlace = true
     else
-        self.Pos, self.Ang = ply:GetEyeTrace().HitPos, Angle(0, 0, 0)
+        self.Pos, self.Ang = ply:GetEyeTrace().HitPos + ply:GetEyeTrace().HitNormal * 32 + ply:GetForward() * 32 + ply:GetUp() * 12, Angle(0, 0, 0)
         canPlace = true
     end
 
@@ -100,7 +100,7 @@ function SWEP:PrimaryAttack()
     end
 
     if countEnt > 0 then canPlace = false end
-    if ply:GetPos():Distance(ply:GetEyeTrace().HitPos) >= 150 then canPlace = false end
+    if ply:GetPos():Distance(ply:GetEyeTrace().HitPos) >= 130 and ply.Selected == "sent_foundation" then canPlace = false end
     if canPlace == false then
         ply:EmitSound("common/wpn_denyselect.wav")
         return
@@ -165,12 +165,15 @@ if CLIENT then
             if v:GetPos():Distance(ply:GetPos()) <= 120 then tblOfEnts[#tblOfEnts + 1] = v end
         end
 
+        local Canplace = false
         nearEnt = tblOfEnts[1]
         local entOnGround = nearEnt
         if nearEnt ~= game.GetWorld() and IsValid(Rust.GhostEntity) and entOnGround and IsValid(entOnGround) then
             self.Pos, self.Ang = Rust.Nests[Rust.Selected ~= nil and Rust.Selected or "sent_foundation"].Pos(Position, entOnGround)
+            Canplace = true
         else
-            self.Pos, self.Ang = ply:GetEyeTrace().HitPos, Angle(0, 0, 0)
+            self.Pos, self.Ang = ply:GetEyeTrace().HitPos + ply:GetEyeTrace().HitNormal * 32 + ply:GetForward() * 32 + ply:GetUp() * 12, Angle(0, 0, 0)
+            Canplace = true
         end
 
         if self.Pos then Rust.GhostEntity:SetPos(self.Pos) end
@@ -179,14 +182,12 @@ if CLIENT then
         Rust.GhostEntity:PhysicsDestroy()
         Rust.GhostEntity:SetMoveType(MOVETYPE_NONE)
         Rust.GhostEntity:SetNotSolid(true)
-        for i = 1, #tbl do
-            if ply:GetPos():Distance(ply:GetEyeTrace().HitPos) >= 150 or tbl[i] == Rust.GhostEntity:GetPos() then
-                Rust.GhostEntity:SetColor(Color(255, 0, 0, 255))
-                return
-            else
-                Rust.GhostEntity:SetColor(Color(47, 47, 255))
-                return
-            end
+        if ply:GetPos():Distance(ply:GetEyeTrace().HitPos) >= 130 and Canplace == false then
+            Rust.GhostEntity:SetColor(Color(255, 0, 0, 255))
+            return
+        else
+            Rust.GhostEntity:SetColor(Color(47, 47, 255))
+            return
         end
     end
 end
