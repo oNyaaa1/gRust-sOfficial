@@ -8,10 +8,7 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-Fixed Stacksize of stuff not giving right amount
-Fixed rock (Hit) size not being big enough
-Fixed hud being too big on notifications
-Added x Marker on trees!
+
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")

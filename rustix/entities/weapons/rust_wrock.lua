@@ -28,18 +28,15 @@ function SWEP:Think()
     if not IsValid(pl) then return end
     if self.delay < CurTime() then
         self.delay = CurTime() + 0.5
-        local tr = {
-            start = pl:EyePos(),
-            endpos = pl:EyePos() + pl:GetAimVector() * 60
-        }
-
-        tr = util.TraceLine(tr)
+        local tr = util.TraceLine({
+            start = pl:GetShootPos(),
+            endpos = pl:GetShootPos() + pl:GetAimVector() * 300,
+            filter = {pl}
+        })
+        print(tr.Entity)
         if tr.HitPos:Distance(pl:GetEyeTrace().HitPos) <= 120 and self.Clicked == true then
             local ent = tr.Entity
-            if ent ~= NULL then
-                self:ShootBullet(25, 1, 0, "", 0, 1)
-            end
-
+            if ent ~= NULL then self:ShootBullet(25, 1, 0, "", 0, 1) end
             self:SendWeaponAnim(ACT_VM_SWINGHIT)
             self.Clicked = false
         end
