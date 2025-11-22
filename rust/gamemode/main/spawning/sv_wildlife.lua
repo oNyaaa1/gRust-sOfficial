@@ -43,6 +43,12 @@ local function MakeCreatureCorpse(ent, damageForce)
     -- Create a creature corpse entity (like in Rust)
     local corpse = ents.Create("prop_ragdoll")
     if not IsValid(corpse) then return end
+    local corpses = corpse:GetPhysicsObject()
+    if corpses then
+        corpses:Sleep()
+        corpses:EnableMotion(true)
+    end
+
     corpse:SetModel(creatureModel)
     corpse:SetPos(groundPos)
     corpse:SetAngles(creatureAngles)
@@ -100,10 +106,7 @@ local function MakeCreatureCorpse(ent, damageForce)
 end
 
 -- Expose function for external use
-gRust.Mining.SpawnCreatureCorpse = function(ent)
-    return MakeCreatureCorpse(ent)
-end
-
+gRust.Mining.SpawnCreatureCorpse = function(ent) return MakeCreatureCorpse(ent) end
 gRust.Mining.MineCreatures = function(ply, ent, weapon, class)
     if not ply.Wood_Cutting_Tool then ply.Wood_Cutting_Tool = 0 end
     if ply.Wood_Cutting_Tool > CurTime() then return end
@@ -125,6 +128,6 @@ gRust.Mining.MineCreatures = function(ply, ent, weapon, class)
         end
 
         -- Remove corpse when fully mined
-        if  ent.Healths  <= 0 then ent:Remove() end
+        if ent.Healths <= 0 then ent:Remove() end
     end
 end

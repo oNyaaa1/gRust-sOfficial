@@ -8,8 +8,11 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-Can now build properly
-Can no  longer build flying bases
+Added Hud (Health/Mana,Water) Numbers
+Better looting on deer
+No more unlimited building
+Fixed space glitches in foundation
+
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")

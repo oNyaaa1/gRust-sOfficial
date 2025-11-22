@@ -44,21 +44,22 @@ end
 if SERVER then net.Receive("gRust_ServerModel", function(len, ply) ply.Selected = net.ReadString() end) end
 local Valid = {}
 local function IsFloatingStrict(ent)
+    if not IsValid(ent) then return false end
     local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
-    local corners = {Vector(mins.x, mins.y, mins.z), Vector(mins.x, maxs.y, mins.z), Vector(maxs.x, mins.y, mins.z), Vector(maxs.x, maxs.y, mins.z),}
+    local corners = {Vector(mins.x, mins.y, mins.z), Vector(mins.x, mins.y, maxs.z), Vector(mins.x, maxs.y, mins.z), Vector(mins.x, maxs.y, maxs.z), Vector(maxs.x, mins.y, mins.z), Vector(maxs.x, mins.y, maxs.z), Vector(maxs.x, maxs.y, mins.z), Vector(maxs.x, maxs.y, maxs.z),}
     for _, offset in ipairs(corners) do
-        local start = ent:LocalToWorld(offset + Vector(0, 0, 2))
+        local start = ent:LocalToWorld(offset)
         local tr = util.TraceLine({
             start = start,
-            endpos = start - Vector(0, 0, 8),
-            filter = ent
+            endpos = start + Vector(0, 0, 0), -- Trace downward
+            mask = MASK_SOLID,
         })
 
-        if tr.Hit then
-            return false -- touching something
+        if tr.HitWorld then
+            return false -- touching ground
         end
     end
-    return true -- all corners floating
+    return true -- all corners in air
 end
 
 if SERVER then
@@ -86,10 +87,14 @@ function SWEP:PrimaryAttack()
     local itemz = ITEMS:GetItem("Wood")
     local bool = false
     for k, v in pairs(itemz:Craft()) do
-        -- bool = ply:TakeItem(v[k].ITEM, 25)
+        bool = ply:TakeItem(v[k].ITEM, 25)
     end
 
-    --if not bool then return end
+    if not bool then
+        ply:EmitSound("common/wpn_denyselect.wav")
+        return
+    end
+
     local canPlace = false
     nearEnt = tblOfEnts[1]
     local entOnGround = nearEnt --or ply:GetGroundEntity()
@@ -184,7 +189,6 @@ if CLIENT then
 
         if not IsValid(Rust.GhostEntity) then
             Rust.GhostEntity = ents.CreateClientProp()
-            print(Rust.Selected)
             Rust.GhostEntity:Spawn()
         end
 

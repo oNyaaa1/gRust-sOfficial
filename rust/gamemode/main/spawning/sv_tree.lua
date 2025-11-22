@@ -89,39 +89,3 @@ local function MakeTreeFall(ent)
         end
     end)
 end
-
-gRust.Mining.MineTrees = function(ply, ent, maxHP, weapon, class)
-    if not ply.Wood_Cutting_Tool then ply.Wood_Cutting_Tool = 0 end
-    if ply.Wood_Cutting_Tool > CurTime() then return end
-    ply.Wood_Cutting_Tool = CurTime() + 0.2
-    local tool = WOOD_WEAPONS[class]
-    if not tool then return end
-    if not ent.treeHealth then ent.treeHealth, ent.treeHits = maxHP, 0 end
-    ent.treeHealth, ent.treeHits = ent.treeHealth - 20, ent.treeHits + 1
-    if ent.Hitted == nil then ent.Hitted = false end
-    ent:SetNWFloat("thealth", ent.treeHealth)
-    if ent.treeHealth <= 0 and ent.Hitted == false then
-        if ent.Hitted == false then
-            local idx = math.min(ent.treeHits, #WOOD_SEQ)
-            local reward = math.Round(WOOD_SEQ[idx] * tool.mult)
-            //ply:GiveItem("Wood", reward)
-            local item = ply:GetItem("Wood")
-            //ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. item["Amount"] .. ")")
-        end
-
-        ent.Hitted = true
-        ent.treeHealth = 0
-        --[[net.Start("gRust.TreeEffects")
-        net.WriteVector(nil)
-        net.WriteAngle(nil)
-        net.WriteEntity(nil)
-        net.Send(ply)]]
-        MakeTreeFall(ent)
-    elseif ent.treeHealth > 0 then
-        /*local idx = math.min(ent.treeHits, #WOOD_SEQ)
-        local reward = math.Round(WOOD_SEQ[idx] * tool.mult)
-        ply:GiveItem("Wood", reward)
-        local item = ply:GetItem("Wood")
-        ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. item["Amount"] .. ")")*/
-    end
-end

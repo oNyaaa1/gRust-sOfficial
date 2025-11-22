@@ -8,6 +8,14 @@ surface.CreateFont("gRustColorFont", {
 	bold = true,
 })
 
+surface.CreateFont("GRustHUDLOW", {
+	font = "Arial",
+	extended = false,
+	size = 25,
+	weight = 1800,
+	bold = true,
+})
+
 function GM:PostDrawViewModel(vm, ply, weapon)
 	if weapon.UseHands or not weapon:IsScripted() then
 		local hands = LocalPlayer():GetHands()

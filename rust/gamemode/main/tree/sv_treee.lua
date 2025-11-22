@@ -64,7 +64,6 @@ local function SendTreeHit(ply, ent, class)
         ent.NoMarker = true
     end
 
-    print(dist)
     if dist <= 17 then
         ent.HotspotPos = ent.HitPos
         ent.LastPos = ent.HitPos
@@ -135,7 +134,7 @@ local function MakeTreeFall(ent)
         end
     end)
 
-    timer.Simple(math.random(600, 900), function()
+    timer.Simple(math.random(300, 600), function()
         local newTree = ents.Create("rust_trees") -- Respawn tree after 10-15 minutes
         if IsValid(newTree) then
             newTree:SetModel(treeModel)
@@ -173,7 +172,6 @@ hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
     if not IsValid(wep) then return end
     local found = string.find(wep:GetClass(), "hatchet") or string.find(wep:GetClass(), "pickaxe") or string.find(wep:GetClass(), "rock")
     if ent.treeFallen == nil then ent.treeFallen = false end
-    print(found, MAT[ent:GetMaterialType()], ent:GetMaterialType())
     if found and MAT[ent:GetMaterialType()] == "MAT_WOOD" or MAT[ent:GetMaterialType()] == "MAT_CONCRETE" and ent.treeFallen == false then
         if not ply:IsPlayer() then return end
         local class = wep:GetClass()
