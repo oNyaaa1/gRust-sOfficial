@@ -11,6 +11,7 @@ surface.CreateFont("MyAweomseRustHud", {
     weight = 2100,
     bold = true,
 })
+
 surface.CreateFont("CraftingHudStylex", {
     font = "Arial",
     extended = false,
@@ -18,6 +19,7 @@ surface.CreateFont("CraftingHudStylex", {
     weight = 2100,
     bold = true,
 })
+
 function gRust.ReloadNotifications()
     if IsValid(gRust.NotificationPanel) then gRust.NotificationPanel:Remove() end
     local Panel = vgui.Create("Panel")
@@ -168,6 +170,9 @@ net.Receive("crafting_Gear", function()
     Timer = net.ReadFloat()
 end)
 
+local mat = Material("path/to/your/icon.png", "noclamp smooth") -- use materials/yourfolder/icon.png or a vgui/material path
+local ang = 0
+hook.Add("HUDPaint", "MyRotatingIcon_HUD", function() end)
 hook.Add("HUDPaint", "WTFCRafting", function()
     if Timer <= 0 then return end
     local master = gRust.NotificationTypes[NOTIFICATION_CRAFT]
@@ -177,19 +182,13 @@ hook.Add("HUDPaint", "WTFCRafting", function()
     local IconToUSe = master.Icon
     surface.SetDrawColor(master.Color)
     surface.DrawRect(poxW, poxH, Width2, Height2)
-    surface.SetDrawColor(master.IconColor)
+    local size = 24
+    -- update angle (frame-dependent)
+    ang = (ang + FrameTime() * 90) % 360 -- 90 degrees per second
+    surface.SetDrawColor(255, 255, 255, 255)
     surface.SetMaterial(IconToUSe)
-    local iconSize = Height2 * 0.8
-    local centerX = iconSize / 2
-    local centerY = Height2 / 2 * 0
-    local matrix = Matrix()
-    master.IconAngle = (master.IconAngle + FrameTime() * 360) % 360
-    //matrix:Translate(Vector(centerX * 103.5, centerY + 760, 0))
-    matrix:Rotate(Angle(0, 0, master.IconAngle))
-    //matrix:Translate(Vector(-centerX, -centerY, 0))
-    cam.PushModelMatrix(matrix)
-    surface.DrawTexturedRect(0, 0, iconSize, iconSize)
-    cam.PopModelMatrix()
-    draw.SimpleText(str, "CraftingHudStylex", poxW + 140, poxH + 10, Color(255, 255, 255, 255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_RIGHT)
+    -- DrawTexturedRectRotated uses center x,y and draws rotated texture
+    surface.DrawTexturedRectRotated(poxW + 15, poxH + 15, size, size, ang)
+    draw.SimpleText(str, "CraftingHudStylex", poxW + 120, poxH + 10, Color(255, 255, 255, 255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_RIGHT)
     draw.SimpleText("Time:" .. tostring(Timer), "MyAweomseRustHud", poxW * 1.150, poxH + 10, Color(255, 255, 255, 255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_RIGHT)
 end)

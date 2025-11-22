@@ -43,6 +43,34 @@ end
 
 if SERVER then net.Receive("gRust_ServerModel", function(len, ply) ply.Selected = net.ReadString() end) end
 local Valid = {}
+local function IsFloatingStrict(ent)
+    local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
+    local corners = {Vector(mins.x, mins.y, mins.z), Vector(mins.x, maxs.y, mins.z), Vector(maxs.x, mins.y, mins.z), Vector(maxs.x, maxs.y, mins.z),}
+    for _, offset in ipairs(corners) do
+        local start = ent:LocalToWorld(offset + Vector(0, 0, 2))
+        local tr = util.TraceLine({
+            start = start,
+            endpos = start - Vector(0, 0, 8),
+            filter = ent
+        })
+
+        if tr.Hit then
+            return false -- touching something
+        end
+    end
+    return true -- all corners floating
+end
+
+if SERVER then
+    hook.Add("Think", "NoFloatingProps", function(ply)
+        for k, ent in pairs(ents.FindByClass("sent_foundation")) do
+            if IsFloatingStrict(ent) then
+                ent:Remove() -- or freeze, or snap-to-ground, etc.
+            end
+        end
+    end)
+end
+
 function SWEP:PrimaryAttack()
     if not SERVER then return end
     self:SetNextPrimaryFire(CurTime() + 0.4)
@@ -118,7 +146,6 @@ function SWEP:PrimaryAttack()
     end
 
     constraint.Weld(twig, Entity(0), 0, 0, 0, false, false)
-    if twig:GetPos():Distance(ply:GetPos()) > 150 then twig:Remove() end
 end
 
 function SWEP:SecondaryAttack()
@@ -159,9 +186,6 @@ if CLIENT then
             Rust.GhostEntity = ents.CreateClientProp()
             print(Rust.Selected)
             Rust.GhostEntity:Spawn()
-            Rust.GhostEntity:PhysicsDestroy()
-            Rust.GhostEntity:SetMoveType(MOVETYPE_NONE)
-            Rust.GhostEntity:SetNotSolid(true)
         end
 
         Rust.GhostEntity:SetModel(Rust.Nests[Rust.Selected].Model)
@@ -174,28 +198,20 @@ if CLIENT then
             if v:GetPos():Distance(ply:GetPos()) <= 120 then tblOfEnts[#tblOfEnts + 1] = v end
         end
 
-        local Canplace = false
         nearEnt = tblOfEnts[1]
         local entOnGround = nearEnt
         if nearEnt ~= game.GetWorld() and IsValid(Rust.GhostEntity) and entOnGround and IsValid(entOnGround) then
             self.Pos, self.Ang = Rust.Nests[Rust.Selected ~= nil and Rust.Selected or "sent_foundation"].Pos(Position, entOnGround)
-            Canplace = true
         else
             self.Pos, self.Ang = ply:GetEyeTrace().HitPos + ply:GetEyeTrace().HitNormal * 32 + ply:GetForward() * 32 + ply:GetUp() * 12, Angle(0, 0, 0)
-            Canplace = true
         end
 
         if self.Pos then Rust.GhostEntity:SetPos(self.Pos) end
         if self.Ang then Rust.GhostEntity:SetAngles(self.Ang) end
-        if ply:GetPos():Distance(ply:GetEyeTrace().HitPos) >= 130 and Canplace == false then
+        if IsFloatingStrict(Rust.GhostEntity) then
             Rust.GhostEntity:SetColor(Color(255, 0, 0, 255))
-            return
         else
             Rust.GhostEntity:SetColor(Color(47, 47, 255))
-            return
         end
-
-        self:SetNextThink(CurTime() + 1)
-        return true
     end
 end
