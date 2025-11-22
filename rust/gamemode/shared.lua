@@ -88,5 +88,5 @@ IncludeDir = function(dir)
     end
 end
 
-IncludeDir("rustix/gamemode/extra")
-IncludeDir("rustix/gamemode/main")
+IncludeDir("rust/gamemode/extra")
+IncludeDir("rust/gamemode/main")

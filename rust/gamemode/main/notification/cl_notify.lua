@@ -184,9 +184,9 @@ hook.Add("HUDPaint", "WTFCRafting", function()
     local centerY = Height2 / 2 * 0
     local matrix = Matrix()
     master.IconAngle = (master.IconAngle + FrameTime() * 360) % 360
-    matrix:Translate(Vector(centerX * 103.5, centerY + 760, 0))
-    matrix:Rotate(Angle(0, master.IconAngle, 0))
-    matrix:Translate(Vector(-centerX, -centerY, 0))
+    //matrix:Translate(Vector(centerX * 103.5, centerY + 760, 0))
+    matrix:Rotate(Angle(0, 0, master.IconAngle))
+    //matrix:Translate(Vector(-centerX, -centerY, 0))
     cam.PushModelMatrix(matrix)
     surface.DrawTexturedRect(0, 0, iconSize, iconSize)
     cam.PopModelMatrix()
