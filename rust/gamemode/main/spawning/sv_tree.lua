@@ -94,8 +94,8 @@ gRust.Mining.MineTrees = function(ply, ent, maxHP, weapon, class)
     if not ply.Wood_Cutting_Tool then ply.Wood_Cutting_Tool = 0 end
     if ply.Wood_Cutting_Tool > CurTime() then return end
     ply.Wood_Cutting_Tool = CurTime() + 0.2
-    local tool = WOOD_WEAPONS[class]
-    if not tool then return end
+    print(class)
+    if not gRust.Mining.IsValidWoodcuttingTool(class) then return end
     if not ent.treeHealth then ent.treeHealth, ent.treeHits = maxHP, 0 end
     ent.treeHealth, ent.treeHits = ent.treeHealth - 20, ent.treeHits + 1
     if ent.Hitted == nil then ent.Hitted = false end
