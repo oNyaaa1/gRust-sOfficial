@@ -170,12 +170,11 @@ hook.Add("PlayerBindPress", "Bindpressgturst", function(ply, bind, pressed)
     local sub = string.gsub(bind, "slot", "")
     local num = tonumber(sub)
     if not num or num <= 0 or num > 6 then return end
-    if IsValid(DermaImageButton[num]) then
+    if DermaImageButton[num] then
+        print(DermaImageButton[num].Weap)
         net.Start("gRustSelectWep")
         net.WriteFloat(num)
-        net.WriteFloat(-1)
         net.WriteString(DermaImageButton[num].Weap or "")
-        net.WriteFloat(num)
         net.SendToServer()
     end
 end)
