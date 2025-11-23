@@ -137,7 +137,7 @@ end
 local meta = FindMetaTable("Player")
 function meta:GetItem(item)
     for k, v in pairs(self.tbl) do
-        print(item,v.Weapon)
+        if not isstring(v.Weapon) then continue end
         if item == v.Weapon then return v end
     end
     return nil
@@ -197,9 +197,7 @@ end
 util.AddNetworkString("gRustSelectWep")
 net.Receive("gRustSelectWep", function(len, ply)
     local id = net.ReadFloat()
-    local NewSlot = net.ReadFloat()
     local proxy_wep = net.ReadString()
-    local proxy_id = net.ReadFloat()
     local itemz = ITEMS:GetItem(proxy_wep)
     if not itemz then return end
     if id >= 1 and id <= 6 then
@@ -209,50 +207,60 @@ net.Receive("gRustSelectWep", function(len, ply)
     end
 end)
 
+function IsSlotFull(ply, ns)
+    for i = 1, #ply.tbl do
+        if ply.tbl[i] and ply.tbl[i].Slotz == ns then return true end
+    end
+    return false
+end
+
 net.Receive("gRustWriteSlot", function(len, ply)
-    local id = net.ReadFloat()
-    local NewSlot = net.ReadFloat()
+    local id = net.ReadFloat() -- target slot
     local proxy_wep = net.ReadString()
-    local proxy_id = net.ReadFloat()
+    local proxy_id = net.ReadFloat() -- slot currently dragging from
     local itemz = ITEMS:GetItem(proxy_wep)
     if not itemz then return end
+    local fromItem = ply.tbl[proxy_id]
+    if not fromItem then return end
+    local targetItem = ply.tbl[id] -- item currently in target slot (if any)
     if id >= 1 and id <= 6 then
         ply:SelectWeapon(itemz.Weapon)
     else
         ply:SelectWeapon("rust_hands")
     end
 
-    if id ~= -1 then
-        ply.tbl[id] = {
-            Slotz = id,
-            Weapon = itemz.Name,
-            Img = itemz.model,
-            Amount = ply.tbl[proxy_id].Amount,
-            SlotFree = false,
-        }
+    -- We are now replacing the target slot
+    ply.tbl[id] = {
+        Slotz = id,
+        Weapon = itemz.Name,
+        Img = itemz.model,
+        Amount = fromItem.Amount,
+        SlotFree = false
+    }
 
-        ply.tbl[proxy_id] = nil
-        net.Start("DragNDropRust")
-        net.WriteTable(ply.tbl)
-        net.Send(ply)
-    elseif NewSlot ~= -1 then
-        ply.tbl[NewSlot] = {
-            Slotz = NewSlot,
-            Weapon = itemz.Name,
-            Img = itemz.model,
-            Amount = ply.tbl[proxy_id].Amount,
+    -- If item existed in target slot, move it to the old location (swap)
+    if targetItem then
+        ply.tbl[proxy_id] = {
+            Slotz = proxy_id,
+            Weapon = targetItem.Weapon,
+            Img = targetItem.Img,
+            Amount = targetItem.Amount,
+            SlotFree = false
         }
-
+    else
+        -- otherwise just clear original slot
         ply.tbl[proxy_id] = nil
-        net.Start("DragNDropRust")
-        net.WriteTable(ply.tbl)
-        net.Send(ply)
     end
+
+    -- sync back to client
+    net.Start("DragNDropRust")
+    net.WriteTable(ply.tbl)
+    net.Send(ply)
 end)
 
 hook.Add("PlayerSpawn", "GiveITem", function(ply)
     PickleAdillyEdit(ply, "Rock", 1)
-    //PickleAdillyEdit(ply, "AK47", 1)
+    --PickleAdillyEdit(ply, "AK47", 1)
     ply:Give("rust_hands")
     ply:SetNWInt("Hunger", math.random(90, 120))
     ply:SetNWInt("Thirst", math.random(90, 100))

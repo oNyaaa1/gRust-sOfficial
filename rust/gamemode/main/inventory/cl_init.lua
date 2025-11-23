@@ -9,7 +9,6 @@ function DoDrop(self, panels, bDoDrop, Command, x, y)
     if bDoDrop and panels[1].OldSlot ~= self.CodeSortID then
         net.Start("gRustWriteSlot")
         net.WriteFloat(self.CodeSortID or -1)
-        net.WriteFloat(self.CodeID or -1)
         net.WriteString(panels[1].Weap)
         net.WriteFloat(panels[1].OldSlot or -1)
         net.SendToServer()
@@ -61,7 +60,6 @@ local function ClearSlots(tbl2)
                 else
                     draw.DrawText("", "RustHudBig", ww / 2 + 40, hh - 15, Color(255, 255, 255), TEXT_ALIGN_RIGHT)
                 end
-
             end
 
             grid:AddCell(pnl1[i])

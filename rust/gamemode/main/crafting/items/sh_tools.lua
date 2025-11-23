@@ -1,24 +1,3 @@
-ITEMS:RegisterItem("Rock", {
-    Name = "Rock",
-    Info = "Rock, Basic gathering tool.",
-    Category = "Tools",
-    model = "materials/items/tools/rock.png",
-    Weapon = "rust_wrock",
-    Count = 1,
-    Craft = function()
-        return {
-            {
-                Time = 5,
-                CanCraft = true,
-                {
-                    ITEM = "Stone",
-                    AMOUNT = 10,
-                },
-            },
-        }
-    end,
-}, "Tools")
-
 --[[
 
 ITEMS:RegisterItem("Stone Hatchet", {
@@ -47,31 +26,6 @@ ITEMS:RegisterItem("Stone Hatchet", {
 }, "Tools")
 
 ]]
-ITEMS:RegisterItem("Stone Pickaxe", {
-    Name = "Stone Pickaxe",
-    Info = "The Stone Pickaxe - Basic for collecting Ores",
-    Category = "Tools",
-    model = "materials/items/tools/stone_pickaxe.png",
-    Weapon = "tfa_rustalpha_stone_hatchet",
-    Count = 1,
-    Craft = function()
-        return {
-            {
-                CanCraft = true,
-                Time = 30,
-                {
-                    ITEM = "Wood",
-                    AMOUNT = 200,
-                },
-                {
-                    ITEM = "Stone",
-                    AMOUNT = 100,
-                },
-            },
-        }
-    end,
-}, "Tools")
-
 ITEMS:RegisterItem("Building Plan", {
     Name = "Building Plan",
     Info = "The Building Plan, For building",
@@ -109,56 +63,6 @@ ITEMS:RegisterItem("Hammer", {
                     ITEM = "Wood",
                     AMOUNT = 200,
                 },
-            },
-        }
-    end,
-}, "Tools")
-
-ITEMS:RegisterItem("Hatchet", {
-    Name = "Hatchet",
-    Info = "Hatchet, Gathering trees!",
-    Category = "Tools",
-    model = "materials/items/tools/hatchet.png",
-    Weapon = "tfa_rustalpha_hatchet",
-    Count = 1,
-    Craft = function()
-        return {
-            {
-                CanCraft = true,
-                Time = 30,
-                {
-                    ITEM = "Wood",
-                    AMOUNT = 400,
-                },
-                {
-                    ITEM = "Metal Fragments",
-                    AMOUNT = 150
-                }
-            },
-        }
-    end,
-}, "Tools")
-
-ITEMS:RegisterItem("Pickaxe", {
-    Name = "Pickaxe",
-    Info = "Pickaxe, Gathering Ores!",
-    Category = "Tools",
-    model = "materials/items/tools/pickaxe.png",
-    Weapon = "tfa_rustalpha_pickaxe",
-    Count = 1,
-    Craft = function()
-        return {
-            {
-                CanCraft = true,
-                Time = 30,
-                {
-                    ITEM = "Wood",
-                    AMOUNT = 400,
-                },
-                {
-                    ITEM = "Metal Fragments",
-                    AMOUNT = 150
-                }
             },
         }
     end,

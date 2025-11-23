@@ -15,8 +15,8 @@ function ENT:Initialize()
     self:SetSolid(SOLID_VPHYSICS)
     self.TreeHealth = TREE_MODELS[self:GetModel()] or 200
 end
-local tree = Material("tree/treemarker.png", "noclamp smooth")
 
+local tree = Material("tree/treemarker.png", "noclamp smooth")
 function ENT:OnTakeDamage(dmg)
     local ply = dmg:GetAttacker()
     if not IsValid(ply) or not ply:IsPlayer() then return end
@@ -47,7 +47,6 @@ function ENT:OnTakeDamage(dmg)
         net.WriteAngle(ply:GetAngles())
         net.WriteEntity(self)
         net.Send(ply)
-        
     end
 
     -- Call mining function

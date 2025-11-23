@@ -33,7 +33,7 @@ local WOOD_WEAPONS = {
 }
 
 local WOOD_SEQ = {6, 14, 22, 32, 43, 55, 68, 83, 99, 128}
-local function SendTreeHit(ply, ent, class)
+function SendTreeHit(ply, ent, class)
     if ent == nil then
         net.Start("gRust.TreeEffects")
         net.WriteVector(Vector())
@@ -64,7 +64,12 @@ local function SendTreeHit(ply, ent, class)
         ent.NoMarker = true
     end
 
-    if dist <= 17 then
+    local idx = math.min(ent.treeHits, #WOOD_SEQ)
+    local reward = 0
+
+    if dist <= 10 then
+        local tool = WOOD_WEAPONS[class]
+        reward = math.Round(WOOD_SEQ[idx] * tool.mult)
         ent.HotspotPos = ent.HitPos
         ent.LastPos = ent.HitPos
         net.Start("gRust.TreeEffects")
@@ -74,19 +79,14 @@ local function SendTreeHit(ply, ent, class)
         net.Broadcast()
         ply:EmitSound("combat/hitmarker.wav")
         --PickleAdillyEdit(ply, "Wood", reward)
-        local tool = WOOD_WEAPONS[class]
-        local idx = math.min(ent.treeHits, #WOOD_SEQ)
-        local reward = math.Round(WOOD_SEQ[idx] * tool.mult)
         ply:GiveItem("Wood", reward)
-        local itemz = ply:GetItem("Wood")
-        ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. itemz["Amount"] .. ")")
-    else
-        local idx = math.min(ent.treeHits, #WOOD_SEQ)
-        local reward = math.Round(WOOD_SEQ[idx])
+    elseif dist > 10 then
+        reward = math.Round(WOOD_SEQ[idx])
         ply:GiveItem("Wood", reward)
-        local items = ply:GetItem("Wood")
-        ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. items["Amount"] .. ")")
     end
+
+    local itemz = ply:GetItem("Wood")
+    ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. itemz["Amount"] or 0 .. ")")
 end
 
 local function MakeTreeFall(ent)
@@ -163,8 +163,7 @@ local TREE_MODELS = {
     ["models/props_foliage/coldstream_cedar_trunk.mdl"] = 170,
     ["models/props_foliage/ah_ash_tree_lg.mdl"] = 190
 }
-
-hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
+--[[hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
     local MAT = BackwardsEnums("MAT_")
     local ply = dmginfo:GetAttacker()
     if not IsValid(ply) then return end
@@ -189,9 +188,9 @@ hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
             --MakeTreeFall(ent)
             -- return
         else
-            SendTreeHit(ply, ent, class)
+           
         end
     end
 
     if ent:GetClass() == "sent_rocks" then end
-end)
+end)]]

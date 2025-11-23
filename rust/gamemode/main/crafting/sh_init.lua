@@ -14,11 +14,15 @@ Tbl[9] = {"Ammo", "icons/ammo.png"}
 Tbl[11] = {"Fun", "icons/servers.png"}
 Tbl[12] = {"Other", "icons/electric.png"}
 Tbl[13] = {"Extra", "icons/electric.png"}
+function ITEMS:GetTbl()
+    return Tbl
+end
+
 function ITEMS:RegisterItem(itemName, items, category)
     self[itemName] = items
     local countz = 0
     for k, v in pairs(ITEMS) do
-        if type(v) == "table" and v.Category == category then countz = countz + 1 end 
+        if type(v) == "table" and v.Category == category then countz = countz + 1 end
     end
 
     COUNT[category] = countz
