@@ -41,7 +41,7 @@ net.Receive("f1MenuGRust", function()
                 for kk, vv in pairs(ButttonsImage) do
                     vv:Remove()
                 end
-                
+
                 for _, j in pairs(ITEMS) do
                     if istable(j) and v[1] == j.Category then
                         ButttonsImage[_] = vgui.Create("DImageButton", copypastez)
@@ -52,7 +52,12 @@ net.Receive("f1MenuGRust", function()
                         ButttonsImage[_]:Dock(LEFT)
                         ButttonsImage[_]:InvalidateParent(true)
                         ButttonsImage[_]:DockMargin(0, 0, 0, h / 2 + 100)
-                        ButttonsImage[_].DoClick = function() print("hi") end
+                        ButttonsImage[_].DoClick = function()
+                            net.Start("f1MenuGRustAdmin")
+                            net.WriteString(j.Name)
+                            net.SendToServer()
+                        end
+
                         ButttonsImage[_].Paint = function(self, wh, hw) draw.DrawText(_, "DermaDefault", 15, 0, Color(255, 255, 255, 255), TEXT_ALIGN_LEFT) end
                     end
                 end

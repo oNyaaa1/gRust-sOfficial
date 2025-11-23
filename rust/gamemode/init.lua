@@ -8,11 +8,7 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-Sorted weapons in order (Weapons added to Weapons)
-Fixed mining trees
-Swapping items is fully fixed! [Thanks chatgpt]
-Added F1 menu for admins
-Admins can now spawn items f1 menu
+
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")

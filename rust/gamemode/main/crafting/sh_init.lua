@@ -14,6 +14,7 @@ Tbl[9] = {"Ammo", "icons/ammo.png"}
 Tbl[11] = {"Fun", "icons/servers.png"}
 Tbl[12] = {"Other", "icons/electric.png"}
 Tbl[13] = {"Extra", "icons/electric.png"}
+Tbl[14] = {"Admin", "icons/electric.png"}
 function ITEMS:GetTbl()
     return Tbl
 end
