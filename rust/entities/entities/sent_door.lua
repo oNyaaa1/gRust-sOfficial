@@ -6,6 +6,11 @@ ENT.Category = ""
 ENT.Spawnable = true
 ENT.AdminOnly = false
 ENT.Models = "models/vasey/wood_house/door.mdl"
+function ENT:SetupDataTables()
+	self:NetworkVar("Float", 0, "Healthz")
+	self:NetworkVar("Float", 1, "MaxHealthz")
+end
+
 if SERVER then
 	function ENT:Initialize()
 		self.Entity:SetModel("models/vasey/wood_house/door.mdl")
@@ -18,6 +23,7 @@ if SERVER then
 			phys:EnableMotion(false)
 		end
 
+		self:SetHealthz(100)
 		constraint.Weld(self, Entity(0), 0, 0, 0, true, true)
 		self.Ent_Health = 2500
 		self.Ent_HealthMax = 100
@@ -48,13 +54,8 @@ end ]]
 	end
 
 	function ENT:OnTakeDamage(dmg)
-		local ply = dmg:GetAttacker()
-		local inflictor = dmg:GetInflictor()
-		--if type(inflictor) == "Entity" then return end
-		--if self.PropOwned != ply then return end
-		self.Ent_Health = self.Ent_Health - dmg:GetDamage()
-		if self.Ent_Health <= 0 then self:Remove() end
-		self:SetNWInt("health_" .. self:GetClass(), self.Ent_Health)
+		self:SetHealthz(self:GetHealthz() - dmg:GetDamage())
+		if self:GetHealthz() <= 0 then self:Remove() end
 	end
 
 	function ENT:Use(btn, ply)
@@ -97,7 +98,9 @@ if CLIENT then
 	function ENT:Initialize()
 	end
 
-	function ENT:Draw()
-		self:DrawModel()
+	-- Draw some 3D text
+	function ENT:Draw(flags)
+		-- Draw the model
+		self:DrawModel(flags)
 	end
 end

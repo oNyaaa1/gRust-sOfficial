@@ -8,28 +8,42 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-Fixed hatchet not giving wood from hitting tree
-Fixed building not working properly
-
+Can now rotate walls
+Can now upgrade walls foundation ceiling
+Fixed rock trace not working properly
+Fixed rock not hitting properly
+Fixed rock not doing enough damage to twig and normal dps to wood
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")
 util.AddNetworkString("Rust_TableValid")
 local valid = {
-    ["sent_foundation"] = true
+    ["sent_foundation"] = {true, "models/building_re/wood_foundation.mdl"},
+    ["sent_wall"] = {true, "models/building_re/wood_wall.mdl"},
+    ["sent_ceiling"] = {true, "models/building_re/wood_floor.mdl"},
+    ["sent_doorway"] = {true, "models/building_re/wood_dframe.mdl"}
 }
 
+local rotation = -90
 net.Receive("gRust_ServerModel_new", function(len, ply)
     local msg = net.ReadString()
+    if msg == "Rotate" then
+        local eye_t_e = ply:GetEyeTrace().Entity
+        rotation = rotation + 90
+        eye_t_e:SetAngles(Angle(0, rotation, 0))
+    end
+
     if msg == "Wood" then
         local eye_t_e = ply:GetEyeTrace().Entity
-        if not valid[eye_t_e:GetClass()] then return end
-        local ent = eye_t_e
-        ent:SetModel("models/building_re/wood_foundation.mdl")
-        ent:SetMaxHealth(250)
-        ent:SetHealth(250)
-        //ent:Remove()
-        ply:EmitSound("zohart/building/hammer-saw-" .. math.random(1, 3) .. ".wav")
+        local valid_ent = valid[eye_t_e:GetClass()]
+        if valid_ent[1] then
+            local ent = eye_t_e
+            ent:SetModel(valid_ent[2])
+            ent:SetHealthz(250)
+            ent:SetMaxHealthz(250)
+            --ent:Remove()
+            ply:EmitSound("zohart/building/hammer-saw-" .. math.random(1, 3) .. ".wav")
+        end
     end
 end)
 

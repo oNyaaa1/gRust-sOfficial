@@ -6,6 +6,11 @@ ENT.Category = ""
 ENT.Spawnable = true
 ENT.AdminOnly = false
 ENT.Models = "models/building/twig_foundation.mdl"
+function ENT:SetupDataTables()
+    self:NetworkVar("Float", 0, "Healthz")
+    self:NetworkVar("Float", 1, "MaxHealthz")
+end
+
 if SERVER then
     function ENT:Initialize()
         self.Entity:SetModel(self.Models)
@@ -15,9 +20,10 @@ if SERVER then
         local phys = self:GetPhysicsObject()
         if phys:IsValid() then
             phys:Wake()
-            //phys:EnableMotion(false)
+            --phys:EnableMotion(false)
         end
 
+        self:SetHealthz(100)
         constraint.Weld(self, Entity(0), 0, 0, 0, true, true)
         self.Ent_Health = 50
         --self:SetMaterial("Model/effects/vol_light001")
@@ -41,12 +47,8 @@ end ]]
     end
 
     function ENT:OnTakeDamage(dmg)
-        local ply = dmg:GetAttacker()
-        local inflictor = dmg:GetInflictor()
-        --if self.PropOwned ~= ply then return end
-        self.Ent_Health = self.Ent_Health - dmg:GetDamage()
-        if self.Ent_Health <= 0 then self:Remove() end
-        self:SetNWInt("health_" .. self:GetClass(), self.Ent_Health)
+        self:SetHealthz(self:GetHealthz() - dmg:GetDamage())
+        if self:GetHealthz() <= 0 then self:Remove() end
     end
 
     function ENT:OnRemove()
@@ -62,7 +64,8 @@ if CLIENT then
     function ENT:Initialize()
     end
 
-    function ENT:Draw()
-        self:DrawModel()
+    function ENT:Draw(flags)
+        -- Draw the model
+        self:DrawModel(flags)
     end
 end

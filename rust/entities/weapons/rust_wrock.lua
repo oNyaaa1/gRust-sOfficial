@@ -28,15 +28,13 @@ function SWEP:Think()
     if not IsValid(pl) then return end
     if self.delay < CurTime() then
         self.delay = CurTime() + 0.5
-        local tr = util.TraceLine({
-            start = pl:GetShootPos(),
-            endpos = pl:GetShootPos() + pl:GetAimVector() * 100000,
-            filter = {pl}
-        })
-
-        if pl:GetPos():Distance(pl:GetEyeTrace().HitPos) <= 120 and self.Clicked == true then
+        local tr = pl:GetEyeTrace()
+        if pl:GetPos():Distance(tr.HitPos) <= 150 and self.Clicked == true then
             local ent = tr.Entity
-            if ent ~= NULL then self:ShootBullet(25, 1, 0, "", 0, 1) end
+            local findtwig = string.find(ent:GetModel(),"twig")
+            local damage = math.random(1,6)
+            if findtwig then damage = 25 end
+            if ent ~= NULL then self:ShootBullet(damage, 1, 0, "", 0, 1) end
             self:SendWeaponAnim(ACT_VM_SWINGHIT)
             self.Clicked = false
         end
