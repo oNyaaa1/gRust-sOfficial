@@ -8,6 +8,8 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
+Fixed hatchet not giving wood from hitting tree
+Fixed building not working properly
 
 ]]
 util.AddNetworkString("gRust_ServerModel_new")

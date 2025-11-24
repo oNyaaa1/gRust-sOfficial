@@ -22,16 +22,15 @@ end
 
 local WOOD_WEAPONS = {
     ["rust_wrock"] = {
+        mult = 0.5
+    },
+    ["tfa_rustalpha_stonehatchet"] = {
+        mult = 0.8
+    },
+    ["tfa_rustalpha_hatchet"] = {
         mult = 1
-    },
-    ["rust_stonehatchet"] = {
-        mult = 1.3
-    },
-    ["rust_hatchet"] = {
-        mult = 1.8
     }
 }
-
 local WOOD_SEQ = {6, 14, 22, 32, 43, 55, 68, 83, 99, 128}
 function SendTreeHit(ply, ent, class)
     if ent == nil then

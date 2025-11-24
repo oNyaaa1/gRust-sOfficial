@@ -43,31 +43,27 @@ end
 
 if SERVER then net.Receive("gRust_ServerModel", function(len, ply) ply.Selected = net.ReadString() end) end
 local Valid = {}
-local function IsFloatingStrict(ent)
+local function IsFloatingStrict(ent, isClientGhost)
     if not IsValid(ent) then return false end
     local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
-    local corners = {Vector(mins.x, mins.y, mins.z), Vector(mins.x, mins.y, maxs.z), Vector(mins.x, maxs.y, mins.z), Vector(mins.x, maxs.y, maxs.z), Vector(maxs.x, mins.y, mins.z), Vector(maxs.x, mins.y, maxs.z), Vector(maxs.x, maxs.y, mins.z), Vector(maxs.x, maxs.y, maxs.z),}
-    for _, offset in ipairs(corners) do
-        local start = ent:LocalToWorld(offset)
-        local tr = util.TraceLine({
-            start = start,
-            endpos = start + Vector(0, 0, 0), -- Trace downward
-            mask = MASK_SOLID,
-        })
-
-        if tr.HitWorld then
-            return false -- touching ground
-        end
-    end
-    return true -- all corners in air
+    -- Start slightly above model bottom
+    local startBottom = ent:LocalToWorld(Vector(0, 0, mins.z + 2))
+    local endBottom = ent:LocalToWorld(Vector(0, 0, mins.z - 20))
+    local tr = util.TraceHull({
+        start = startBottom,
+        endpos = endBottom,
+        mins = Vector(mins.x + 1, mins.y + 1, 0),
+        maxs = Vector(maxs.x - 1, maxs.y - 1, 5),
+        mask = isClientGhost and MASK_SOLID or MASK_SOLID_BRUSHONLY,
+        filter = ent
+    })
+    return not tr.Hit
 end
 
 if SERVER then
-    hook.Add("Think", "NoFloatingProps", function(ply)
-        for k, ent in pairs(ents.FindByClass("sent_foundation")) do
-            if IsFloatingStrict(ent) then
-                ent:Remove() -- or freeze, or snap-to-ground, etc.
-            end
+    timer.Create("NoFloatingProps", 0.3, 0, function()
+        for _, ent in ipairs(ents.FindByClass("sent_foundation")) do
+            if IsFloatingStrict(ent, false) then ent:Remove() end
         end
     end)
 end
@@ -190,6 +186,7 @@ if CLIENT then
         if not IsValid(Rust.GhostEntity) then
             Rust.GhostEntity = ents.CreateClientProp()
             Rust.GhostEntity:Spawn()
+            Rust.GhostEntity:SetupBones()
         end
 
         Rust.GhostEntity:SetModel(Rust.Nests[Rust.Selected].Model)
@@ -212,8 +209,8 @@ if CLIENT then
 
         if self.Pos then Rust.GhostEntity:SetPos(self.Pos) end
         if self.Ang then Rust.GhostEntity:SetAngles(self.Ang) end
-        if IsFloatingStrict(Rust.GhostEntity) then
-            Rust.GhostEntity:SetColor(Color(255, 0, 0, 255))
+        if IsFloatingStrict(Rust.GhostEntity, true) then
+            Rust.GhostEntity:SetColor(Color(255, 0, 0))
         else
             Rust.GhostEntity:SetColor(Color(47, 47, 255))
         end

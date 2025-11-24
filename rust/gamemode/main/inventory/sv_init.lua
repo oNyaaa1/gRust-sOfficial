@@ -148,51 +148,73 @@ function meta:GiveItem(item, amount)
     return true
 end
 
+function meta:CalcTotal(item)
+    local total = 0
+    for _, v in pairs(self.tbl) do
+        if istable(v) and v.Weapon == item then
+            total = total + (v.Amount or 0)
+        end
+    end
+    return total
+end
+
+
 function meta:TakeItem(item, amount)
     local itemz = ITEMS:GetItem(item)
     if not itemz then
-        print("Cannot find", item, " As an item!")
-        return
+        print("Cannot find", item, "As an item!")
+        return false
     end
 
-    local CurrentAmount = 0
+    -- Check total
+    local total = self:CalcTotal(item)
+    if total < amount then
+        self:SendNotification("", NOTIFICATION_REMOVE, "materials/icons/bite.png",
+            "Not enough " .. itemz.Name)
+        return false
+    end
+
+    -- Remove amount from existing stacks
+    local remaining = amount
+
     for k, v in pairs(self.tbl) do
-        if not istable(v) then continue end
-        if v.Weapon == itemz.Name then
-            local amont = v.Amount or 0
-            if amont ~= nil and amont >= 1000 then
-                adding = true
-                slotss = k
-                CurrentAmount = amont
-            elseif v.Weapon == itemz.Name and amont < 1000 then
-                editmode = true
-                slotss = k
-                CurrentAmount = amont
+        if istable(v) and v.Weapon == itemz.Name then
+            local stack = v.Amount or 0
+
+            if stack >= remaining then
+                -- Take what we need and finish
+                v.Amount = stack - remaining
+
+                if v.Amount <= 0 then
+                    self.tbl[k] = nil -- remove empty
+                end
+
+                remaining = 0
                 break
+            else
+                -- Remove the whole stack
+                remaining = remaining - stack
+                self.tbl[k] = nil
             end
         end
     end
 
-    if CurrentAmount < amount then
-        self:SendNotification("", NOTIFICATION_REMOVE, "materials/icons/bite.png", "Not enough " .. itemz.Name)
-        return false
+    -- Should be finished
+    if remaining > 0 then
+        print("ERROR: Remaining > 0 after removal (inventory corruption?)")
     end
 
-    self:SetNWFloat(item, CurrentAmount - amount)
-    self.tbl[slotss] = {
-        Slotz = slotss,
-        Weapon = item,
-        Img = itemz.model,
-        Amount = CurrentAmount - amount,
-        SlotFree = false,
-    }
+    -- Notify + network sync
+    self:SendNotification(item, NOTIFICATION_REMOVE,
+        "materials/icons/bite.png", "Removed: " .. amount)
 
-    self:SendNotification(item, NOTIFICATION_REMOVE, "materials/icons/bite.png", "Total: -" .. amount)
     net.Start("DragNDropRust")
     net.WriteTable(self.tbl)
     net.Send(self)
+
     return true
 end
+
 
 util.AddNetworkString("gRustSelectWep")
 net.Receive("gRustSelectWep", function(len, ply)

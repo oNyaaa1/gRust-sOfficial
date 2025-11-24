@@ -20,9 +20,4 @@ hook.Add("PostDrawOpaqueRenderables", "DrawTreeXMarker", function()
     if not hitPos then return end
     if not IsValid(Ent) then return end
     util.DecalEx(decal, Ent, hitPos, hitPos:GetNormalized(), Color(0, 255, 0), 0.1, 0.1)
-    --cam.Start3D2D(hitPos, Angles - Angle(90, 0, 0), 1)
-    --surface.SetMaterial(tree)
-    --surface.SetDrawColor(color_white)
-    --surface.DrawTexturedRect(0, 0, 24, 24)
-    --cam.End3D2D()
 end)
