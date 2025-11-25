@@ -13,6 +13,13 @@ function DoDrop(self, panels, bDoDrop, Command, x, y)
         net.WriteFloat(panels[1].OldSlot or -1)
         net.SendToServer()
         panels[1]:SetParent(self)
+    /*else
+        net.Start("gRustDropInv")
+        net.WriteFloat(self.CodeSortID or -1)
+        net.WriteString(panels[1].Weap)
+        net.WriteFloat(panels[1].OldSlot or -1)
+        net.SendToServer()
+        panels[1]:SetParent(self)*/
     end
 end
 

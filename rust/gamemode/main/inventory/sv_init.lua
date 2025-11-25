@@ -3,14 +3,16 @@ util.AddNetworkString("gRust_COD")
 util.AddNetworkString("SendSlots")
 util.AddNetworkString("DragNDropRust")
 util.AddNetworkString("gRustWriteSlot")
+util.AddNetworkString("gRustDropInv")
 resource.AddSingleFile("model/tree/treemarker.png")
+local meta = FindMetaTable("Player")
 hook.Add("InitPostEntity", "WipeStart", function() if game.GetMap() ~= "rust_fields" then game.ConsoleCommand("changelevel rust_fields\n") end end)
 hook.Add("GetFallDamage", "CSSFallDamage", function(ply, speed) return math.max(0, math.ceil(0.2418 * speed - 141.75)) end)
 function FindValidSlotBackWards(ply, select_Slot)
     if select_Slot then return select_Slot end
     local SlotByDefault = 1
     local FoundSlot = false
-    for i = 1, 48 do
+    for i = 1, 36 do
         if ply.tbl[i] == nil then
             ply.tbl[i] = {
                 SlotFree = true
@@ -27,7 +29,7 @@ function FindValidSlotBackWards(ply, select_Slot)
     end
 
     if FoundSlot == false then
-        for i = 8, 48 do
+        for i = 8, 36 do
             if ply.tbl[i].SlotFree == true then
                 SlotByDefault = i
                 FoundSlot = true
@@ -47,12 +49,42 @@ local FindSlot = function(ply, item)
     return nil
 end
 
+function meta:CalcTotal(item)
+    local total = 0
+    for _, v in pairs(self.tbl) do
+        if istable(v) and v.Weapon == item then total = total + (v.Amount or 0) end
+    end
+    return total
+end
+
+function IsSlotFull(ply)
+    for i = 1, #ply.tbl do
+        if ply.tbl[i] and ply.tbl[i].Slotz == i then return true end
+    end
+    return false
+end
+
+function IsInvFull(ply)
+    local FoundSlot = false
+    for i = 1, #ply.tbl do
+        if ply.tbl[i] and ply.tbl[i].SlotFree == true then FoundSlot = true end
+    end
+
+    print(FoundSlot)
+    return FoundSlot
+end
+
 function PickleAdillyEdit(ply, wep, amount)
     if ply.Slots == nil then ply.Slotz = {} end
     if ply.tbl == nil then
         ply.tbl = {
             SlotFree = true
         }
+    end
+
+    if IsInvFull(ply) == false then
+        ply:SendNotification("Inventory Full", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "")
+        return "Inventory Full"
     end
 
     local itemz = ITEMS:GetItem(wep)
@@ -70,7 +102,7 @@ function PickleAdillyEdit(ply, wep, amount)
             Slotz = sloto,
             Weapon = wep,
             Img = itemz.model,
-            Amount = amount,
+            Amount = math.Clamp(amount, 0, itemz.StackSize or 0),
         }
 
         net.Start("DragNDropRust")
@@ -134,30 +166,19 @@ function PickleAdillyEdit(ply, wep, amount)
     end
 end
 
-local meta = FindMetaTable("Player")
 function meta:GetItem(item)
     for k, v in pairs(self.tbl) do
+        if not istable(v) then continue end
         if not isstring(v.Weapon) then continue end
         if item == v.Weapon then return v end
     end
-    return nil
 end
 
-function meta:GiveItem(item, amount)
-    PickleAdillyEdit(self, item, amount)
+function meta:GiveItem(item, amount, itm)
+    local itmz = PickleAdillyEdit(self, item, amount)
+    if itmz ~= "Inventory Full" then ply:SendNotification(itm, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. " (" .. ply:CalcTotal(itm) or 0 .. ") ") end
     return true
 end
-
-function meta:CalcTotal(item)
-    local total = 0
-    for _, v in pairs(self.tbl) do
-        if istable(v) and v.Weapon == item then
-            total = total + (v.Amount or 0)
-        end
-    end
-    return total
-end
-
 
 function meta:TakeItem(item, amount)
     local itemz = ITEMS:GetItem(item)
@@ -169,22 +190,18 @@ function meta:TakeItem(item, amount)
     -- Check total
     local total = self:CalcTotal(item)
     if total < amount then
-        self:SendNotification("", NOTIFICATION_REMOVE, "materials/icons/bite.png",
-            "Not enough " .. itemz.Name)
+        self:SendNotification("", NOTIFICATION_REMOVE, "materials/icons/bite.png", "Not enough " .. itemz.Name)
         return false
     end
 
     -- Remove amount from existing stacks
     local remaining = amount
-
     for k, v in pairs(self.tbl) do
         if istable(v) and v.Weapon == itemz.Name then
             local stack = v.Amount or 0
-
             if stack >= remaining then
                 -- Take what we need and finish
                 v.Amount = stack - remaining
-
                 if v.Amount <= 0 then
                     self.tbl[k] = nil -- remove empty
                 end
@@ -200,21 +217,14 @@ function meta:TakeItem(item, amount)
     end
 
     -- Should be finished
-    if remaining > 0 then
-        print("ERROR: Remaining > 0 after removal (inventory corruption?)")
-    end
-
+    if remaining > 0 then print("ERROR: Remaining > 0 after removal (inventory corruption?)") end
     -- Notify + network sync
-    self:SendNotification(item, NOTIFICATION_REMOVE,
-        "materials/icons/bite.png", "Removed: " .. amount)
-
+    self:SendNotification(item, NOTIFICATION_REMOVE, "materials/icons/bite.png", "Removed: " .. amount)
     net.Start("DragNDropRust")
     net.WriteTable(self.tbl)
     net.Send(self)
-
     return true
 end
-
 
 util.AddNetworkString("gRustSelectWep")
 net.Receive("gRustSelectWep", function(len, ply)
@@ -229,12 +239,76 @@ net.Receive("gRustSelectWep", function(len, ply)
     end
 end)
 
-function IsSlotFull(ply, ns)
-    for i = 1, #ply.tbl do
-        if ply.tbl[i] and ply.tbl[i].Slotz == ns then return true end
+net.Receive("gRustDropInv", function(len, ply)
+    local id = net.ReadFloat() -- target slot in inventory
+    local proxy_wep = net.ReadString()
+    local proxy_id = net.ReadFloat() -- slot currently dragging from
+    local itemz = ITEMS:GetItem(proxy_wep)
+    if not itemz then return end
+
+    local fromItem = ply.tbl[proxy_id]
+    if not fromItem then return end
+
+    local targetItem = ply.tbl[id] -- item currently in target slot (if any)
+
+    -- Check if target is a "bag" slot (e.g., bag slot ID = 0)
+    if id == 0 then
+        -- Find nearest bag entity within range
+        local trace = ply:GetEyeTrace()
+        local entz = trace.Entity
+        local itemz = ply:GetItem(proxy_wep)
+        if IsValid(ent) and ply:GetPos():Distance(ent:GetPos()) < 200 then
+            -- Add item to bag
+            /*local ent = ents.Create("grust_bag")
+            ent.Items = ent.Items or {}
+            table.insert(ent.Items, {
+                Weapon = itemz.Name,
+                Amount = fromItem.Amount,
+                Img = itemz.model
+            })*/
+
+            -- Remove item from player inventory
+            ply.tbl[proxy_id] = nil
+
+            -- Notify client
+            net.Start("DragNDropRust")
+            net.WriteTable(ply.tbl)
+            net.Send(ply)
+        end
+        return
     end
-    return false
-end
+
+    -- Normal inventory swap logic
+    if id >= 1 and id <= 6 then
+        ply:SelectWeapon(itemz.Weapon)
+    else
+        ply:SelectWeapon("rust_hands")
+    end
+
+    ply.tbl[id] = {
+        Slotz = id,
+        Weapon = itemz.Name,
+        Img = itemz.model,
+        Amount = fromItem.Amount,
+        SlotFree = false
+    }
+
+    if targetItem then
+        ply.tbl[proxy_id] = {
+            Slotz = proxy_id,
+            Weapon = targetItem.Weapon,
+            Img = targetItem.Img,
+            Amount = targetItem.Amount,
+            SlotFree = false
+        }
+    else
+        ply.tbl[proxy_id] = nil
+    end
+
+    net.Start("DragNDropRust")
+    net.WriteTable(ply.tbl)
+    net.Send(ply)
+end)
 
 net.Receive("gRustWriteSlot", function(len, ply)
     local id = net.ReadFloat() -- target slot

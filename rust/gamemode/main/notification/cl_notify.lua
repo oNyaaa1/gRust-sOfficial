@@ -170,9 +170,7 @@ net.Receive("crafting_Gear", function()
     Timer = net.ReadFloat()
 end)
 
-local mat = Material("path/to/your/icon.png", "noclamp smooth") -- use materials/yourfolder/icon.png or a vgui/material path
 local ang = 0
-hook.Add("HUDPaint", "MyRotatingIcon_HUD", function() end)
 hook.Add("HUDPaint", "WTFCRafting", function()
     if Timer <= 0 then return end
     local master = gRust.NotificationTypes[NOTIFICATION_CRAFT]

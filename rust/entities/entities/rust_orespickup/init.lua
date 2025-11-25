@@ -41,10 +41,7 @@ function ENT:Use(activator, caller)
     if self.CurrentUses >= self.MaxUses then return end
     if not self.OreType then return end
     local amount = math.random(self.OreType.amount[1], self.OreType.amount[2])
-    if activator:GiveItem(self.OreType.item, amount) then
-        //activator:SendNotification(self.OreType.name, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount)
-        local item = activator:GetItem(self.OreType.name)
-		activator:SendNotification(self.OreType.name, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. " (" .. item["Amount"] .. ")")
+    if activator:GiveItem(self.OreType.item, amount,self.OreType.name) then
         -- Map item names to available sound groups
         local soundMap = {
             ["stone"] = "stone",

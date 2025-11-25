@@ -75,10 +75,6 @@ gRust.Mining.MineOres = function(ply, ent, weapon, class, dmg)
     local itemClass = seq.item
     local itemData = ITEMS:GetItem(itemClass)
     local itemName = itemData and itemData.Name
-    ply:GiveItem(seq.item, reward)
-    local item = ply:GetItem(seq.item)
-    ply:SendNotification(seq.item, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. item["Amount"] .. ")")
-    --ply:SendNotification(itemName, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward)
     if ent.AttacksRock == nil then ent.AttacksRock = 0 end
     ent.AttacksRock = ent.AttacksRock + 10
     if ent.AttacksRock >= 50 then
@@ -99,8 +95,17 @@ gRust.Mining.MineOres = function(ply, ent, weapon, class, dmg)
     local worldPos = ent:LocalToWorld(localPos)
     ent:SetNW2Vector("Weakspot", worldPos)
     local weakspot = ent:LocalToWorld(worldPos)
-    local hitpos = dmg:GetDamagePosition()
-    if hitpos:Distance(weakspot) < 20 then ent:EmitSound("tools/rock_strike_1.mp3") end
+    local hitpos = ply:GetEyeTrace().HitPos
+    print(hitpos:Distance(worldPos))
+    local dist = hitpos:Distance(worldPos)
+    print("Distance to weakspot:", dist)
+    if dist < 20 then
+        ent:EmitSound("farming/flare_hit.wav")
+        ply:GiveItem(seq.item, reward * 2, seq.item)
+    else
+        ply:GiveItem(seq.item, reward, seq.item)
+    end
+
     if ent.oreHealth <= 0 then
         ent:EmitSound("tools/rock_strike_1.mp3")
         local pos = ent:GetPos()

@@ -8,9 +8,6 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-Runspeed is now 280 (Rust Speed)
-Can no longer farm deer with weapons only rock, stone hatchet, hatchet
-Added flare to rock!
 
 ]]
 util.AddNetworkString("gRust_ServerModel_new")

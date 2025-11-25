@@ -78,14 +78,11 @@ function SendTreeHit(ply, ent, class)
         net.Broadcast()
         ply:EmitSound("combat/hitmarker.wav")
         --PickleAdillyEdit(ply, "Wood", reward)
-        ply:GiveItem("Wood", reward)
+        ply:GiveItem("Wood", reward,"Wood")
     elseif dist > 10 then
         reward = math.Round(WOOD_SEQ[idx])
-        ply:GiveItem("Wood", reward)
+        ply:GiveItem("Wood", reward,"Wood")
     end
-
-    local itemz = ply:GetItem("Wood")
-    ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. itemz["Amount"] or 0 .. ")")
 end
 
 local function MakeTreeFall(ent)

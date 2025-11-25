@@ -104,18 +104,8 @@ gRust.Mining.MineTrees = function(ply, ent, maxHP, weapon, class)
         if ent.Hitted == false then SendTreeHit(ply, ent, class) end
         ent.Hitted = true
         ent.treeHealth = 0
-        --[[net.Start("gRust.TreeEffects")
-        net.WriteVector(nil)
-        net.WriteAngle(nil)
-        net.WriteEntity(nil)
-        net.Send(ply)]]
         MakeTreeFall(ent)
     elseif ent.treeHealth > 0 then
         SendTreeHit(ply, ent, class)
-        --[[local idx = math.min(ent.treeHits, #WOOD_SEQ)
-        local reward = math.Round(WOOD_SEQ[idx] * tool.mult)
-        ply:GiveItem("Wood", reward)
-        local item = ply:GetItem("Wood")
-        ply:SendNotification("Wood", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. reward .. " (" .. item["Amount"] .. ")")]]
     end
 end

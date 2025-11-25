@@ -124,8 +124,8 @@ gRust.Mining.MineCreatures = function(ply, ent, weapon, class)
         -- Give loot only from corpses
         for _, lootItem in pairs(creatureData.loot) do
             local amount = math.random(lootItem.min, lootItem.max)
-            ply:GiveItem(lootItem.item, amount)
-            ply:SendNotification(lootItem.name, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount)
+            ply:GiveItem(lootItem.item, amount, lootItem.item)
+            
         end
 
         -- Remove corpse when fully mined
