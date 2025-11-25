@@ -76,12 +76,6 @@ end
 
 function PickleAdillyEdit(ply, wep, amount)
     if ply.Slots == nil then ply.Slotz = {} end
-    if ply.tbl == nil then
-        ply.tbl = {
-            SlotFree = true
-        }
-    end
-
     if IsInvFull(ply) == false then
         ply:SendNotification("Inventory Full", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "")
         return "Inventory Full"
@@ -93,6 +87,7 @@ function PickleAdillyEdit(ply, wep, amount)
         return
     end
 
+    ply:SendNotification(wep, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. " (" .. ply:CalcTotal(wep) or 0 .. ") ")
     if itemz.Weapon ~= "" then ply:Give(itemz.Weapon) end
     local slot = FindSlot(ply, wep)
     if slot == nil and amount > 0 then
@@ -176,7 +171,7 @@ end
 
 function meta:GiveItem(item, amount, itm)
     local itmz = PickleAdillyEdit(self, item, amount)
-    if itmz ~= "Inventory Full" then ply:SendNotification(itm, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. " (" .. ply:CalcTotal(itm) or 0 .. ") ") end
+    if itmz ~= "Inventory Full" then self:SendNotification(item, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. " (" .. self:CalcTotal(item) or 0 .. ") ") end
     return true
 end
 
@@ -245,12 +240,9 @@ net.Receive("gRustDropInv", function(len, ply)
     local proxy_id = net.ReadFloat() -- slot currently dragging from
     local itemz = ITEMS:GetItem(proxy_wep)
     if not itemz then return end
-
     local fromItem = ply.tbl[proxy_id]
     if not fromItem then return end
-
     local targetItem = ply.tbl[id] -- item currently in target slot (if any)
-
     -- Check if target is a "bag" slot (e.g., bag slot ID = 0)
     if id == 0 then
         -- Find nearest bag entity within range
@@ -259,17 +251,15 @@ net.Receive("gRustDropInv", function(len, ply)
         local itemz = ply:GetItem(proxy_wep)
         if IsValid(ent) and ply:GetPos():Distance(ent:GetPos()) < 200 then
             -- Add item to bag
-            /*local ent = ents.Create("grust_bag")
+            --[[local ent = ents.Create("grust_bag")
             ent.Items = ent.Items or {}
             table.insert(ent.Items, {
                 Weapon = itemz.Name,
                 Amount = fromItem.Amount,
                 Img = itemz.model
-            })*/
-
+            })]]
             -- Remove item from player inventory
             ply.tbl[proxy_id] = nil
-
             -- Notify client
             net.Start("DragNDropRust")
             net.WriteTable(ply.tbl)
@@ -313,48 +303,91 @@ end)
 net.Receive("gRustWriteSlot", function(len, ply)
     local id = net.ReadFloat() -- target slot
     local proxy_wep = net.ReadString()
-    local proxy_id = net.ReadFloat() -- slot currently dragging from
+    local proxy_id = net.ReadFloat() -- source slot
     local itemz = ITEMS:GetItem(proxy_wep)
     if not itemz then return end
     local fromItem = ply.tbl[proxy_id]
     if not fromItem then return end
-    local targetItem = ply.tbl[id] -- item currently in target slot (if any)
+    local targetItem = ply.tbl[id] -- what's in target slot (if anything)
+    -- Weapon selection logic
     if id >= 1 and id <= 6 then
         ply:SelectWeapon(itemz.Weapon)
     else
         ply:SelectWeapon("rust_hands")
     end
 
-    -- We are now replacing the target slot
-    ply.tbl[id] = {
-        Slotz = id,
-        Weapon = itemz.Name,
-        Img = itemz.model,
-        Amount = fromItem.Amount,
-        SlotFree = false
-    }
-
-    -- If item existed in target slot, move it to the old location (swap)
-    if targetItem then
-        ply.tbl[proxy_id] = {
-            Slotz = proxy_id,
-            Weapon = targetItem.Weapon,
-            Img = targetItem.Img,
-            Amount = targetItem.Amount,
+    ------------------------------------
+    -- STACKING SAME ITEM
+    ------------------------------------
+    if targetItem and targetItem.Weapon == fromItem.Weapon and itemz.Stackable then
+        local newAmount = targetItem.Amount + fromItem.Amount
+        -- Clamp to max stack size
+        local maxSize = itemz.StackSize or 1
+        local clamped = math.Clamp(newAmount, 0, maxSize)
+        -- Set target slot to clamped amount
+        targetItem.Amount = clamped
+        -- Overflow handling
+        local overflow = newAmount - clamped
+        if overflow > 0 then
+            -- Put leftover back into original slot
+            ply.tbl[proxy_id] = {
+                Slotz = proxy_id,
+                Weapon = fromItem.Weapon,
+                Img = fromItem.Img,
+                Amount = overflow,
+                SlotFree = false
+            }
+        else
+            -- No leftovers, empty original slot
+            ply.tbl[proxy_id] = nil
+        end
+    else
+        ------------------------------------
+        -- NORMAL SWAP OR MOVE
+        ------------------------------------
+        -- place dragged item into target slot
+        ply.tbl[id] = {
+            Slotz = id,
+            Weapon = itemz.Name,
+            Img = itemz.model,
+            Amount = fromItem.Amount,
             SlotFree = false
         }
-    else
-        -- otherwise just clear original slot
-        ply.tbl[proxy_id] = nil
+
+        -- swap back if target was filled
+        if targetItem then
+            ply.tbl[proxy_id] = {
+                Slotz = proxy_id,
+                Weapon = targetItem.Weapon,
+                Img = targetItem.Img,
+                Amount = targetItem.Amount,
+                SlotFree = false
+            }
+        else
+            -- target empty -> clear original
+            ply.tbl[proxy_id] = nil
+        end
     end
 
-    -- sync back to client
+    -- sync inventory to client
     net.Start("DragNDropRust")
     net.WriteTable(ply.tbl)
     net.Send(ply)
 end)
 
 hook.Add("PlayerSpawn", "GiveITem", function(ply)
+    if ply.tbl == nil then
+        ply.tbl = {
+            SlotFree = true
+        }
+    end
+
+    for i = 1, 36 do
+        ply.tbl[i] = {
+            SlotFree = true
+        }
+    end
+
     PickleAdillyEdit(ply, "Rock", 1)
     --PickleAdillyEdit(ply, "AK47", 1)
     ply:Give("rust_hands")
