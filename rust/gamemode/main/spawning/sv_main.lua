@@ -37,7 +37,7 @@ hook.Add("EntityTakeDamage", "gRust.ResourceHits", function(ent, dmg)
         local validTool = gRust.Mining.IsValidMiningTool(class)
         if not validTool then return true end
         LoggerPlayer(ply, "is mining ore.")
-        gRust.Mining.MineOres(ply, ent, weapon, class)
+        gRust.Mining.MineOres(ply, ent, weapon, class, dmg)
         -- gRust.Mining.MineOres(attacker, self, attacker:GetWeapon(attacker:GetActiveWeapon():GetClass()))
     end
 end)

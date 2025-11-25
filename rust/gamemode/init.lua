@@ -8,11 +8,10 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-Can now rotate walls
-Can now upgrade walls foundation ceiling
-Fixed rock trace not working properly
-Fixed rock not hitting properly
-Fixed rock not doing enough damage to twig and normal dps to wood
+Runspeed is now 280 (Rust Speed)
+Can no longer farm deer with weapons only rock, stone hatchet, hatchet
+Added flare to rock!
+
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")
@@ -53,6 +52,7 @@ hook.Add("PlayerSpawn", "PlayerModelSelector", function(ply)
         local rnd = math.random(1, 3)
         ply:SetSkin(rnd)
         ply:SetBodygroup(3, 1)
+        ply:SetRunSpeed(280)
         if Rust.KeepInventory == false then ply.Inventory = {} end
     end
 end)

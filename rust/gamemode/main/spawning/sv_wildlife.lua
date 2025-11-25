@@ -112,6 +112,7 @@ gRust.Mining.MineCreatures = function(ply, ent, weapon, class)
     if ply.Wood_Cutting_Tool > CurTime() then return end
     ply.Wood_Cutting_Tool = CurTime() + 0.2
     -- Only handle creature corpses
+    if not gRust.Mining.IsValidWoodcuttingTool(class) then return end
     if ent:GetClass() == "prop_ragdoll" then
         --local creatureType = ent:GetCreatureType()
         local creatureData = CREATURE_LOOT["prop_ragdoll"]

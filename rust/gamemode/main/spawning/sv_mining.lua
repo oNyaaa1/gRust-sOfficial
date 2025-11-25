@@ -38,7 +38,29 @@ local ORE_SEQ = {
 
 -- Function to check if a weapon is a valid mining tool
 gRust.Mining.IsValidMiningTool = function(weaponClass) return ORE_WEAPONS[weaponClass] ~= nil end
-gRust.Mining.MineOres = function(ply, ent, weapon, class)
+local function GenerateTopWeakspot(ent)
+    local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
+    for i = 1, 50 do -- up to 50 attempts
+        local lx = math.Rand(mins.x, maxs.x)
+        local ly = math.Rand(mins.y, maxs.y)
+        -- Start WELL above the rock
+        local start = ent:LocalToWorld(Vector(lx, ly, maxs.z + 50))
+        local finish = ent:LocalToWorld(Vector(lx, ly, mins.z - 10))
+        local tr = util.TraceLine({
+            start = start,
+            endpos = finish,
+            filter = ent
+        })
+
+        if tr.Hit then
+            -- Only accept surfaces facing upward
+            if tr.HitNormal.z > 0.5 then return ent:WorldToLocal(tr.HitPos) end
+        end
+    end
+    return nil
+end
+
+gRust.Mining.MineOres = function(ply, ent, weapon, class, dmg)
     if not ply.Wood_Cutting_Tool then ply.Wood_Cutting_Tool = 0 end
     if ply.Wood_Cutting_Tool > CurTime() then return end
     ply.Wood_Cutting_Tool = CurTime() + 0.2
@@ -69,6 +91,16 @@ gRust.Mining.MineOres = function(ply, ent, weapon, class)
         ent:EmitSound("tools/rock_strike_1.mp3")
     end
 
+    local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
+    -- pick the top-center of the model
+    local localPos = Vector((mins.x + maxs.x) * 0.5, (mins.y + maxs.y) * 0.5, maxs.z)
+    -- top face
+    -- convert to world space
+    local worldPos = ent:LocalToWorld(localPos)
+    ent:SetNW2Vector("Weakspot", worldPos)
+    local weakspot = ent:LocalToWorld(worldPos)
+    local hitpos = dmg:GetDamagePosition()
+    if hitpos:Distance(weakspot) < 20 then ent:EmitSound("tools/rock_strike_1.mp3") end
     if ent.oreHealth <= 0 then
         ent:EmitSound("tools/rock_strike_1.mp3")
         local pos = ent:GetPos()

@@ -9,6 +9,7 @@ function ENT:Initialize()
     self:SetMoveType(MOVETYPE_VPHYSICS)
     self:SetSolid(SOLID_VPHYSICS)
     local phys = self:GetPhysicsObject()
+    self.firsthit = false
     if IsValid(phys) then
         phys:Wake()
         phys:EnableMotion(false)
