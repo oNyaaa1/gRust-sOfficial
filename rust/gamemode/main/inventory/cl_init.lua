@@ -5,34 +5,9 @@ gRustJas = gRustJas or {}
 gRustJas.Inventory = {}
 local pnl2 = nil
 local frame2 = nil
-function DoDrop(self, panels, bDoDrop, Command, x, y)
-    if bDoDrop and panels[1].OldSlot ~= self.CodeSortID then
-        net.Start("gRustWriteSlot")
-        net.WriteFloat(self.CodeSortID or -1)
-        net.WriteString(panels[1].Weap)
-        net.WriteFloat(panels[1].OldSlot or -1)
-        net.SendToServer()
-        panels[1]:SetParent(self)
-    /*else
-        net.Start("gRustDropInv")
-        net.WriteFloat(self.CodeSortID or -1)
-        net.WriteString(panels[1].Weap)
-        net.WriteFloat(panels[1].OldSlot or -1)
-        net.SendToServer()
-        panels[1]:SetParent(self)*/
-    end
-end
-
-surface.CreateFont("RustHudBig", {
-    font = "Arial",
-    extended = false,
-    size = 20,
-    weight = 2100,
-    bold = true,
-})
-
 local DermaImageButton = {}
 local pnl1 = {}
+local pnl2 = {}
 local function ClearSlots(tbl2)
     if IsValid(pnl2) then pnl2:Remove() end
     pnl1 = {}
@@ -86,6 +61,17 @@ local function ClearSlots(tbl2)
         DermaImageButton[k].Model_IMG = v.Img
         DermaImageButton[k].Weap = v.Weapon
         DermaImageButton[k].OldSlot = v.Slotz
+        --[[DermaImageButton[k].Think = function(s)
+            local finisheddrag = false
+            if not s:IsDragging() then finisheddrag = true end
+            if finisheddrag and not input.WasMousePressed(MOUSE_LEFT) and vgui.IsHoveringWorld() then
+                net.Start("gRustDropInv")
+                net.WriteFloat(-1) -- -1 = world
+                net.WriteString(DermaImageButton[k].Weap)
+                net.WriteFloat(DermaImageButton[k].OldSlot or -1)
+                net.SendToServer()
+            end
+        end]]
         DermaImageButton[k].Paint = function(s, ww, hh)
             if s:IsHovered() then
                 draw.RoundedBox(0, 0, 0, 80, 76, Color(5, 217, 255, 190))
@@ -102,12 +88,43 @@ net.Receive("DragNDropRust", function()
     ClearSlots(gRustJas.Inventory)
 end)
 
+function DoDrop(self, panels, bDoDrop)
+    -- if bDoDrop then
+    --if not id and input.IsMouseDown(MOUSE_LEFT) then return end
+    --print(id == nil)
+    --print("Dropped")
+    -- Dropped outside → world drop
+    --[[net.Start("gRustDropInv")
+                net.WriteFloat(-1) -- -1 = world
+                net.WriteString(panels[1].Weap)
+                net.WriteFloat(panels[1].OldSlot or -1)
+                net.SendToServer()]]
+    -- end
+    -- Check if it's actually an inventory slot
+    if bDoDrop and panels[1].OldSlot ~= self.CodeSortID then
+        -- Dropped on inventory slot
+        net.Start("gRustWriteSlot")
+        net.WriteFloat(self.CodeSortID or -1)
+        net.WriteString(panels[1].Weap)
+        net.WriteFloat(panels[1].OldSlot or -1)
+        net.SendToServer()
+        panels[1]:SetParent(self)
+    end
+end
+
+surface.CreateFont("RustHudBig", {
+    font = "Arial",
+    extended = false,
+    size = 20,
+    weight = 2100,
+    bold = true,
+})
+
 function GM:ScoreboardShow()
-    local pnl2 = {}
     frame2 = vgui.Create("DPanel", frame)
-    frame2:SetSize(500, 500)
+    frame2:SetSize(500, 417)
     frame2:SetPos(w * 0.35, h * 0.40)
-    frame2.Paint = function(s, ww, hh) draw.RoundedBox(0, 0, 0, ww, hh, Color(65, 65, 65, 0)) end
+    frame2.Paint = function(s, ww, hh) draw.RoundedBox(0, 0, 0, ww, hh, Color(65, 65, 65, 255)) end
     local grid2 = vgui.Create("ThreeGrid", frame2)
     grid2:Dock(FILL)
     grid2:DockMargin(4, 4, 4, 4)
@@ -153,6 +170,30 @@ function GM:ScoreboardShow()
         DermaImageButton[k].Model_IMG = v.Img
         DermaImageButton[k].Weap = v.Weapon
         DermaImageButton[k].OldSlot = v.Slotz
+        -- On release, check if we are over another slot
+        DermaImageButton[k].OnMouseReleased = function(s,mc)
+            print(mc)
+            if mc ~= MOUSE_LEFT then return end
+            -- Check if hovering any other slot
+            local overOtherSlot = false
+            for i = 1, 36 do
+                local other = DermaImageButton[i]
+                if IsValid(other) and other ~= DermaImageButton[k] and other:IsHovered() then
+                    overOtherSlot = true
+                    break
+                end
+            end
+
+            -- Only drop in world if not hovering another slot
+            if not overOtherSlot then
+                net.Start("gRustDropInv")
+                net.WriteFloat(-1) -- -1 = world
+                net.WriteString(DermaImageButton[k].Weap)
+                net.WriteFloat(DermaImageButton[k].OldSlot or -1)
+                net.SendToServer()
+            end
+        end
+
         DermaImageButton[k].Paint = function(s, ww, hh)
             if s:IsHovered() then
                 draw.RoundedBox(0, 0, 0, 80, 76, Color(5, 217, 255, 190))
@@ -178,7 +219,6 @@ hook.Add("PlayerBindPress", "Bindpressgturst", function(ply, bind, pressed)
     local num = tonumber(sub)
     if not num or num <= 0 or num > 6 then return end
     if DermaImageButton[num] then
-        print(DermaImageButton[num].Weap)
         net.Start("gRustSelectWep")
         net.WriteFloat(num)
         net.WriteString(DermaImageButton[num].Weap or "")

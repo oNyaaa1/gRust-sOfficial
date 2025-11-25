@@ -75,7 +75,6 @@ function IsInvFull(ply)
 end
 
 function PickleAdillyEdit(ply, wep, amount)
-    if ply.Slots == nil then ply.Slotz = {} end
     if IsInvFull(ply) == false then
         ply:SendNotification("Inventory Full", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "")
         return "Inventory Full"
@@ -87,7 +86,7 @@ function PickleAdillyEdit(ply, wep, amount)
         return
     end
 
-    ply:SendNotification(wep, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. " (" .. ply:CalcTotal(wep) or 0 .. ") ")
+    ply:SendNotification(wep, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. " (" .. ply:CalcTotal(wep) or 1 .. ") ")
     if itemz.Weapon ~= "" then ply:Give(itemz.Weapon) end
     local slot = FindSlot(ply, wep)
     if slot == nil and amount > 0 then
@@ -97,7 +96,7 @@ function PickleAdillyEdit(ply, wep, amount)
             Slotz = sloto,
             Weapon = wep,
             Img = itemz.model,
-            Amount = math.Clamp(amount, 0, itemz.StackSize or 0),
+            Amount = math.Clamp(amount, 1, itemz.StackSize or 0),
         }
 
         net.Start("DragNDropRust")
@@ -133,7 +132,7 @@ function PickleAdillyEdit(ply, wep, amount)
             Slotz = slotss,
             Weapon = wep,
             Img = itemz.model,
-            Amount = math.Clamp(CurrentAmount + amount or 0, 0, itemz.StackSize or 1000),
+            Amount = math.Clamp(CurrentAmount + amount or 0, 1, itemz.StackSize or 1000),
             SlotFree = false,
         }
 
@@ -150,7 +149,7 @@ function PickleAdillyEdit(ply, wep, amount)
             Slotz = sloto,
             Weapon = wep,
             Img = itemz.model,
-            Amount = math.Clamp(amount or 0, 0, itemz.StackSize),
+            Amount = math.Clamp(amount or 0, 1, itemz.StackSize),
             SlotFree = false,
         }
 
@@ -234,72 +233,6 @@ net.Receive("gRustSelectWep", function(len, ply)
     end
 end)
 
-net.Receive("gRustDropInv", function(len, ply)
-    local id = net.ReadFloat() -- target slot in inventory
-    local proxy_wep = net.ReadString()
-    local proxy_id = net.ReadFloat() -- slot currently dragging from
-    local itemz = ITEMS:GetItem(proxy_wep)
-    if not itemz then return end
-    local fromItem = ply.tbl[proxy_id]
-    if not fromItem then return end
-    local targetItem = ply.tbl[id] -- item currently in target slot (if any)
-    -- Check if target is a "bag" slot (e.g., bag slot ID = 0)
-    if id == 0 then
-        -- Find nearest bag entity within range
-        local trace = ply:GetEyeTrace()
-        local entz = trace.Entity
-        local itemz = ply:GetItem(proxy_wep)
-        if IsValid(ent) and ply:GetPos():Distance(ent:GetPos()) < 200 then
-            -- Add item to bag
-            --[[local ent = ents.Create("grust_bag")
-            ent.Items = ent.Items or {}
-            table.insert(ent.Items, {
-                Weapon = itemz.Name,
-                Amount = fromItem.Amount,
-                Img = itemz.model
-            })]]
-            -- Remove item from player inventory
-            ply.tbl[proxy_id] = nil
-            -- Notify client
-            net.Start("DragNDropRust")
-            net.WriteTable(ply.tbl)
-            net.Send(ply)
-        end
-        return
-    end
-
-    -- Normal inventory swap logic
-    if id >= 1 and id <= 6 then
-        ply:SelectWeapon(itemz.Weapon)
-    else
-        ply:SelectWeapon("rust_hands")
-    end
-
-    ply.tbl[id] = {
-        Slotz = id,
-        Weapon = itemz.Name,
-        Img = itemz.model,
-        Amount = fromItem.Amount,
-        SlotFree = false
-    }
-
-    if targetItem then
-        ply.tbl[proxy_id] = {
-            Slotz = proxy_id,
-            Weapon = targetItem.Weapon,
-            Img = targetItem.Img,
-            Amount = targetItem.Amount,
-            SlotFree = false
-        }
-    else
-        ply.tbl[proxy_id] = nil
-    end
-
-    net.Start("DragNDropRust")
-    net.WriteTable(ply.tbl)
-    net.Send(ply)
-end)
-
 net.Receive("gRustWriteSlot", function(len, ply)
     local id = net.ReadFloat() -- target slot
     local proxy_wep = net.ReadString()
@@ -375,13 +308,102 @@ net.Receive("gRustWriteSlot", function(len, ply)
     net.Send(ply)
 end)
 
-hook.Add("PlayerSpawn", "GiveITem", function(ply)
-    if ply.tbl == nil then
-        ply.tbl = {
-            SlotFree = true
-        }
+net.Receive("gRustDropInv", function(len, ply)
+    local targetID = net.ReadFloat() -- -1 = world, otherwise ent index
+    local itemID = net.ReadString()
+    local fromSlot = net.ReadFloat()
+    local item = ITEMS:GetItem(itemID)
+    if not item then return end
+    local invItem = ply.tbl[fromSlot]
+    if not invItem then return end
+    -- Case: drop to world
+    if targetID == -1 then
+        ply.tbl[fromSlot] = nil
+        local dropPos = ply:GetShootPos() + ply:GetAimVector() * 30
+        local ent = ents.Create("rust_item")
+        if IsValid(ent) then
+            ent:SetPos(dropPos)
+            ent:SetItem(itemID)
+            ent:SetCount(invItem.Amount or 1)
+            ent:Spawn()
+            ent:Activate()
+        else
+            print("[gRustDropInv] failed to create rust_item")
+        end
+
+        -- sync & return
+        net.Start("DragNDropRust")
+        net.WriteTable(ply.tbl)
+        net.Send(ply)
+        return
     end
 
+    -- Case: attempted deposit into entity by ent index
+    local targetEnt = Entity(targetID)
+    if not IsValid(targetEnt) then
+        print("[gRustDropInv] target ent invalid:", targetID)
+        -- fallback: world-drop (same as above) or just return
+        -- (I'll do world-drop fallback)
+        ply.tbl[fromSlot] = nil
+        local dropPos = ply:GetShootPos() + ply:GetAimVector() * 30
+        local ent = ents.Create("rust_item")
+        if IsValid(ent) then
+            ent:SetPos(dropPos)
+            ent:SetItem(itemID)
+            ent:SetCount(invItem.Amount or 1)
+            ent:Spawn()
+            ent:Activate()
+        end
+
+        net.Start("DragNDropRust")
+        net.WriteTable(ply.tbl)
+        net.Send(ply)
+        return
+    end
+
+    -- Make sure the target actually exposes AddItem
+    if type(targetEnt.AddItem) == "function" then
+        -- Remove from player first (or adjust stack logic as you prefer)
+        ply.tbl[fromSlot] = nil
+        local ok, err = pcall(function() targetEnt:AddItem(itemID, invItem.Amount or 1, ply) end)
+        if not ok then
+            print("[gRustDropInv] AddItem failed:", err)
+            -- fallback to world drop
+            local dropPos = ply:GetShootPos() + ply:GetAimVector() * 30
+            local ent = ents.Create("rust_item")
+            if IsValid(ent) then
+                ent:SetPos(dropPos)
+                ent:SetItem(itemID)
+                ent:SetCount(invItem.Amount or 1)
+                ent:Spawn()
+                ent:Activate()
+            end
+        end
+    else
+        print("[gRustDropInv] target ent does not support AddItem:", targetEnt, "class:", targetEnt:GetClass())
+        -- fallback: world drop or deny deposit
+        ply:ChatPrint("That object cannot hold items.")
+        -- optional: world-drop fallback
+        local dropPos = ply:GetShootPos() + ply:GetAimVector() * 30
+        local ent = ents.Create("rust_item")
+        if IsValid(ent) then
+            ent:SetPos(dropPos)
+            ent:SetItem(itemID)
+            ent:SetCount(invItem.Amount or 1)
+            ent:Spawn()
+            ent:Activate()
+        end
+    end
+
+    -- Always sync inventory afterwards
+    net.Start("DragNDropRust")
+    net.WriteTable(ply.tbl)
+    net.Send(ply)
+end)
+
+hook.Add("PlayerSpawn", "GiveITem", function(ply)
+    if ply.Slots == nil then ply.Slotz = {} end
+    ply.tbl = {}
     for i = 1, 36 do
         ply.tbl[i] = {
             SlotFree = true
