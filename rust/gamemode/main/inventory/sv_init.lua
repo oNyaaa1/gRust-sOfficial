@@ -20,7 +20,7 @@ function FindValidSlotBackWards(ply, select_Slot)
         end
     end
 
-    for i = 1, 7 do
+    for i = 7, 36 do
         if ply.tbl[i] and ply.tbl[i].SlotFree == true then
             SlotByDefault = i
             FoundSlot = true
@@ -29,7 +29,7 @@ function FindValidSlotBackWards(ply, select_Slot)
     end
 
     if FoundSlot == false then
-        for i = 8, 36 do
+        for i = 1, 6 do
             if ply.tbl[i].SlotFree == true then
                 SlotByDefault = i
                 FoundSlot = true
@@ -70,7 +70,6 @@ function IsInvFull(ply)
         if ply.tbl[i] and ply.tbl[i].SlotFree == true then FoundSlot = true end
     end
 
-    print(FoundSlot)
     return FoundSlot
 end
 
@@ -86,7 +85,7 @@ function PickleAdillyEdit(ply, wep, amount)
         return
     end
 
-    ply:SendNotification(wep, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. " (" .. ply:CalcTotal(wep) or 1 .. ") ")
+    --ply:SendNotification(wep, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. " (" .. ply:CalcTotal(wep) or 1 .. ") ")
     if itemz.Weapon ~= "" then ply:Give(itemz.Weapon) end
     local slot = FindSlot(ply, wep)
     if slot == nil and amount > 0 then
@@ -309,6 +308,7 @@ net.Receive("gRustWriteSlot", function(len, ply)
 end)
 
 net.Receive("gRustDropInv", function(len, ply)
+    if true then return end
     local targetID = net.ReadFloat() -- -1 = world, otherwise ent index
     local itemID = net.ReadString()
     local fromSlot = net.ReadFloat()
@@ -318,7 +318,10 @@ net.Receive("gRustDropInv", function(len, ply)
     if not invItem then return end
     -- Case: drop to world
     if targetID == -1 then
-        ply.tbl[fromSlot] = nil
+        ply.tbl[fromSlot] = {
+            SlotFree = true
+        }
+
         local dropPos = ply:GetShootPos() + ply:GetAimVector() * 30
         local ent = ents.Create("rust_item")
         if IsValid(ent) then
@@ -331,68 +334,12 @@ net.Receive("gRustDropInv", function(len, ply)
             print("[gRustDropInv] failed to create rust_item")
         end
 
+        ply.tbl[fromSlot] = {}
         -- sync & return
         net.Start("DragNDropRust")
         net.WriteTable(ply.tbl)
         net.Send(ply)
         return
-    end
-
-    -- Case: attempted deposit into entity by ent index
-    local targetEnt = Entity(targetID)
-    if not IsValid(targetEnt) then
-        print("[gRustDropInv] target ent invalid:", targetID)
-        -- fallback: world-drop (same as above) or just return
-        -- (I'll do world-drop fallback)
-        ply.tbl[fromSlot] = nil
-        local dropPos = ply:GetShootPos() + ply:GetAimVector() * 30
-        local ent = ents.Create("rust_item")
-        if IsValid(ent) then
-            ent:SetPos(dropPos)
-            ent:SetItem(itemID)
-            ent:SetCount(invItem.Amount or 1)
-            ent:Spawn()
-            ent:Activate()
-        end
-
-        net.Start("DragNDropRust")
-        net.WriteTable(ply.tbl)
-        net.Send(ply)
-        return
-    end
-
-    -- Make sure the target actually exposes AddItem
-    if type(targetEnt.AddItem) == "function" then
-        -- Remove from player first (or adjust stack logic as you prefer)
-        ply.tbl[fromSlot] = nil
-        local ok, err = pcall(function() targetEnt:AddItem(itemID, invItem.Amount or 1, ply) end)
-        if not ok then
-            print("[gRustDropInv] AddItem failed:", err)
-            -- fallback to world drop
-            local dropPos = ply:GetShootPos() + ply:GetAimVector() * 30
-            local ent = ents.Create("rust_item")
-            if IsValid(ent) then
-                ent:SetPos(dropPos)
-                ent:SetItem(itemID)
-                ent:SetCount(invItem.Amount or 1)
-                ent:Spawn()
-                ent:Activate()
-            end
-        end
-    else
-        print("[gRustDropInv] target ent does not support AddItem:", targetEnt, "class:", targetEnt:GetClass())
-        -- fallback: world drop or deny deposit
-        ply:ChatPrint("That object cannot hold items.")
-        -- optional: world-drop fallback
-        local dropPos = ply:GetShootPos() + ply:GetAimVector() * 30
-        local ent = ents.Create("rust_item")
-        if IsValid(ent) then
-            ent:SetPos(dropPos)
-            ent:SetItem(itemID)
-            ent:SetCount(invItem.Amount or 1)
-            ent:Spawn()
-            ent:Activate()
-        end
     end
 
     -- Always sync inventory afterwards

@@ -4,7 +4,6 @@ ENT.Base = "base_anim"
 ENT.PrintName = "Dropped Item"
 ENT.Author = "Time"
 ENT.Spawnable = false
-
 if SERVER then
 	function ENT:Initialize()
 		-- default model until we set proper model from item data
@@ -51,12 +50,11 @@ if SERVER then
 		if not ITEMS or not ITEMS:GetItem(itemID) then return false, "No ITEMS table" end
 		local info = ITEMS:GetItem(itemID)
 		if not info then return false, "Bad itemID" end
-		self.Inventory = self.Inventory or {}
 		self.MaxSlots = self.MaxSlots or 6
 		-- Try to stack into existing slot first if item is stackable
 		if info.Stackable then
 			for i = 1, self.MaxSlots do
-				local slot = self.Inventory[i]
+				local slot = ply.tbl[i]
 				if slot and slot.Name == itemID then
 					slot.Amount = (slot.Amount or 0) + amount
 					-- clamp to StackSize
@@ -74,8 +72,8 @@ if SERVER then
 
 		-- find empty slot
 		for i = 1, self.MaxSlots do
-			if not self.Inventory[i] then
-				self.Inventory[i] = {
+			if not ply.tbl[i] then
+				ply.tbl[i] = {
 					Slotz = i,
 					Name = itemID,
 					Weapon = info.Weapon,
@@ -116,10 +114,9 @@ if SERVER then
 		-- your pickup logic here; example: give into player's inventory table
 		local itemID = self:GetItem()
 		local count = self:GetCount()
-		print(itemID,count)
-		//caller:GiveItem(itemID,count)
-		PickleAdillyEdit(caller, "Rock", 1)
-		self:Remove()
+		--caller:GiveItem(itemID,count)
+		PickleAdillyEdit(caller, itemID, count)
+		timer.Simple(0.5, function() if IsValid(self) then self:Remove() end end)
 		-- fallback: if player can't receive, do nothing
 	end
 

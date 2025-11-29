@@ -4,7 +4,6 @@ net.Receive("f1MenuGRustAdmin", function(len, pl)
     if not pl:IsAdmin() then return end
     local itemName = net.ReadString()
     local stack = ITEMS:GetItem(itemName)
-    print(itemName, stack)
     pl:GiveItem(itemName, stack.StackSize or stack.Count)
 end)
 

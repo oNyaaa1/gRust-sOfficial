@@ -8,6 +8,10 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
+Fixed stuff not going straight into inventory instead of hotbar
+Better version of the spawning system
+Roadpost now go on road instead of random places
+Need to recode a better drop system
 
 ]]
 util.AddNetworkString("gRust_ServerModel_new")

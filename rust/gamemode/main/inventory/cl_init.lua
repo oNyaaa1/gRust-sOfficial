@@ -3,11 +3,11 @@ local w, h = ScrW(), ScrH()
 hook.Add("OnScreenSizeChanged", "FixEdWidTh", function(_, _, nw, nh) w, h = ScrW(), ScrH() end)
 gRustJas = gRustJas or {}
 gRustJas.Inventory = {}
-local pnl2 = nil
 local frame2 = nil
 local DermaImageButton = {}
 local pnl1 = {}
 local pnl2 = {}
+local fram1 = nil
 local function ClearSlots(tbl2)
     if IsValid(pnl2) then pnl2:Remove() end
     pnl1 = {}
@@ -60,18 +60,8 @@ local function ClearSlots(tbl2)
         DermaImageButton[k].DoClick = function() MsgN("You clicked the image!") end
         DermaImageButton[k].Model_IMG = v.Img
         DermaImageButton[k].Weap = v.Weapon
-        DermaImageButton[k].OldSlot = v.Slotz
-        --[[DermaImageButton[k].Think = function(s)
-            local finisheddrag = false
-            if not s:IsDragging() then finisheddrag = true end
-            if finisheddrag and not input.WasMousePressed(MOUSE_LEFT) and vgui.IsHoveringWorld() then
-                net.Start("gRustDropInv")
-                net.WriteFloat(-1) -- -1 = world
-                net.WriteString(DermaImageButton[k].Weap)
-                net.WriteFloat(DermaImageButton[k].OldSlot or -1)
-                net.SendToServer()
-            end
-        end]]
+        DermaImageButton[k].OldSlot = v.Slotz or -1
+        DermaImageButton[k]:SetMouseInputEnabled(true)
         DermaImageButton[k].Paint = function(s, ww, hh)
             if s:IsHovered() then
                 draw.RoundedBox(0, 0, 0, 80, 76, Color(5, 217, 255, 190))
@@ -88,27 +78,73 @@ net.Receive("DragNDropRust", function()
     ClearSlots(gRustJas.Inventory)
 end)
 
-function DoDrop(self, panels, bDoDrop)
-    -- if bDoDrop then
-    --if not id and input.IsMouseDown(MOUSE_LEFT) then return end
-    --print(id == nil)
-    --print("Dropped")
-    -- Dropped outside → world drop
-    --[[net.Start("gRustDropInv")
-                net.WriteFloat(-1) -- -1 = world
-                net.WriteString(panels[1].Weap)
-                net.WriteFloat(panels[1].OldSlot or -1)
-                net.SendToServer()]]
-    -- end
-    -- Check if it's actually an inventory slot
-    if bDoDrop and panels[1].OldSlot ~= self.CodeSortID then
-        -- Dropped on inventory slot
-        net.Start("gRustWriteSlot")
-        net.WriteFloat(self.CodeSortID or -1)
-        net.WriteString(panels[1].Weap)
-        net.WriteFloat(panels[1].OldSlot or -1)
+function DoDrop(self, droppedPanels, bDoDrop)
+    local dragged = droppedPanels[1] -- panel being dragged
+    local target = self -- slot receiving the drop
+    -- If dropped on a valid slot
+    if bDoDrop then
+        if dragged.OldSlot ~= target.CodeSortID then
+            net.Start("gRustWriteSlot")
+            net.WriteFloat(target.CodeSortID) -- new slot
+            net.WriteString(dragged.Weap) -- weapon/item id
+            net.WriteFloat(dragged.OldSlot) -- old slot
+            net.SendToServer()
+        end
+
+        dragged:SetParent(target)
+        return -- Exit here, don't drop to world
+    end
+
+    -- bDoDrop is FALSE here - means not dropped on any valid slot
+    -- Prevent multiple world drops
+    if dragged.HasDropped then return end
+    if not IsValid(fram1) then return end
+    -- Check if outside the inventory panel
+    local isOutside = not (fram1:IsHovered() or fram1:IsChildHovered())
+    if isOutside then
+        dragged.HasDropped = true
+        net.Start("gRustDropInv")
+        net.WriteFloat(-1) -- -1 = world
+        net.WriteString(dragged.Weap)
+        net.WriteFloat(dragged.OldSlot)
         net.SendToServer()
-        panels[1]:SetParent(self)
+        dragged:Remove()
+        timer.Simple(0.1, function() if IsValid(dragged) then dragged.HasDropped = false end end)
+    end
+end
+
+function DoDrop(self, droppedPanels, bDoDrop)
+    local dragged = droppedPanels[1] -- panel being dragged
+    local target = self -- slot receiving the drop
+    -- If dropped on a valid slot
+    if bDoDrop then
+        if dragged.OldSlot ~= target.CodeSortID then
+            net.Start("gRustWriteSlot")
+            net.WriteFloat(target.CodeSortID) -- new slot
+            net.WriteString(dragged.Weap) -- weapon/item id
+            net.WriteFloat(dragged.OldSlot) -- old slot
+            net.SendToServer()
+        end
+
+        dragged:SetParent(target)
+        return -- Exit here, don't drop to world
+    end
+
+    -- bDoDrop is FALSE here - means not dropped on any valid slot
+    -- Prevent multiple world drops
+    if dragged.HasDropped then return end
+    if not IsValid(fram1) then return end
+    -- Check if outside the inventory panel
+    local isOutside = fram1:IsHovered() and self == fram1
+    if isOutside then
+        dragged.HasDropped = true
+        net.Start("gRustDropInv")
+        net.WriteFloat(-1) -- -1 = world
+        net.WriteString(dragged.Weap)
+        net.WriteFloat(dragged.OldSlot)
+        net.SendToServer()
+        --dragged:Remove()
+        timer.Simple(0.1, function() if IsValid(dragged) then dragged.HasDropped = false end end)
     end
 end
 
@@ -121,7 +157,13 @@ surface.CreateFont("RustHudBig", {
 })
 
 function GM:ScoreboardShow()
-    frame2 = vgui.Create("DPanel", frame)
+    fram1 = vgui.Create("DPanel", frame)
+    fram1:SetSize(w, h)
+    fram1:SetPos(0, 0)
+    fram1.CodeSortID = -1
+    //fram1:Receiver("DroppableRust", DoDrop)
+    fram1.Paint = function(s, ww, hh) draw.RoundedBox(0, 0, 0, ww, hh, Color(65, 65, 65, 0)) end
+    frame2 = vgui.Create("DPanel", fram1)
     frame2:SetSize(500, 417)
     frame2:SetPos(w * 0.35, h * 0.40)
     frame2.Paint = function(s, ww, hh) draw.RoundedBox(0, 0, 0, ww, hh, Color(65, 65, 65, 255)) end
@@ -137,7 +179,7 @@ function GM:ScoreboardShow()
             pnl2[i] = vgui.Create("DPanel")
             pnl2[i]:SetTall(80)
             pnl2[i]:SetWide(180)
-            pnl2[i].CodeSortID = i
+            pnl2[i].CodeSortID = i or -1
             pnl2[i]:Receiver("DroppableRust", DoDrop)
             pnl2[i].Paint = function(s, ww, hh)
                 if s:IsHovered() then
@@ -168,32 +210,15 @@ function GM:ScoreboardShow()
         DermaImageButton[k]:Droppable("DroppableRust")
         DermaImageButton[k].DoClick = function() MsgN("You clicked the image!") end
         DermaImageButton[k].Model_IMG = v.Img
+        DermaImageButton[k]:SetMouseInputEnabled(true)
         DermaImageButton[k].Weap = v.Weapon
-        DermaImageButton[k].OldSlot = v.Slotz
+        DermaImageButton[k].OldSlot = v.Slotz or -1
         -- On release, check if we are over another slot
-        DermaImageButton[k].OnMouseReleased = function(s,mc)
-            print(mc)
-            if mc ~= MOUSE_LEFT then return end
-            -- Check if hovering any other slot
-            local overOtherSlot = false
-            for i = 1, 36 do
-                local other = DermaImageButton[i]
-                if IsValid(other) and other ~= DermaImageButton[k] and other:IsHovered() then
-                    overOtherSlot = true
-                    break
-                end
-            end
-
-            -- Only drop in world if not hovering another slot
-            if not overOtherSlot then
-                net.Start("gRustDropInv")
-                net.WriteFloat(-1) -- -1 = world
-                net.WriteString(DermaImageButton[k].Weap)
-                net.WriteFloat(DermaImageButton[k].OldSlot or -1)
-                net.SendToServer()
-            end
-        end
-
+        --DermaImageButton[k].OnMouseReleased = function(self, mc)
+        --    if mc ~= MOUSE_LEFT then return end
+        -- If dropped on a valid receiver → handled by DoDrop
+        -- end
+        DermaImageButton[k].NewSlot = v.Slotz
         DermaImageButton[k].Paint = function(s, ww, hh)
             if s:IsHovered() then
                 draw.RoundedBox(0, 0, 0, 80, 76, Color(5, 217, 255, 190))
@@ -209,7 +234,7 @@ end
 
 function GM:ScoreboardHide()
     gui.EnableScreenClicker(false)
-    if IsValid(frame2) then frame2:Remove() end
+    if IsValid(fram1) then fram1:Remove() end
     return true
 end
 

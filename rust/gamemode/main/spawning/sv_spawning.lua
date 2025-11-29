@@ -14,6 +14,27 @@ local hempSpawns = GetConVar("gr_spawnsystem_hemp"):GetInt() * 2.5
 local orePickupSpawns = GetConVar("gr_spawnsystem_ore_pickups"):GetInt() * 2.5
 -- Predefined spawn positions
 -- Find random valid positions on the map
+local function MathrewName(mat)
+    if mat == "grass" then return "grass" end
+    if mat == "dirt" then return "dirt" end
+    if mat == "snow" then return "snow" end
+    if mat == "gravel" then return "gravel" end
+    if mat == "rock" then return "stones" end
+    if mat == "carpet" then return "cloth" end
+    if mat == "mud" then return "forest" end
+    if mat == "chainlink" then return "metal" end
+    if string.find(mat, "wood") then return "wood" end
+    if string.find(mat, "metal") then return "metal" end
+    if string.find(mat, "sand") then return "sand" end
+    if string.find(mat, "ice") then return "ice" end
+    return "concrete"
+end
+
+local function TraceGround(Trace)
+    local Result = Trace
+    return Result.SurfaceProps == 0 and "default" or util.GetSurfacePropName(Result.SurfaceProps)
+end
+
 local function FindRandomPlacesOnMap(count)
     local positions = {}
     local attempts = 0
@@ -27,8 +48,9 @@ local function FindRandomPlacesOnMap(count)
             mask = MASK_SOLID_BRUSHONLY
         })
 
+        local mat = MathrewName(TraceGround(tr))
         if table.HasValue(positions, tr.HitPos + Vector(0, 0, 10)) then return end
-        if tr.Hit and tr.HitPos.z > 50 and tr.HitPos.z < 1000 then table.insert(positions, tr.HitPos + Vector(0, 0, 10)) end
+        if tr.Hit and tr.HitPos.z > 50 and tr.HitPos.z < 1000 and mat == "grass" then table.insert(positions, tr.HitPos + Vector(0, 0, 10)) end
     end
     return positions
 end
@@ -50,7 +72,8 @@ local function FindRandomPlacesOnMapRS(count)
             mask = MASK_SOLID_BRUSHONLY
         })
 
-        if tr.Hit and tr.HitPos.z > 50 and tr.HitPos.z < 1000 then table.insert(positions, tr.HitPos + Vector(0, 0, 10)) end
+        local mat = MathrewName(TraceGround(tr))
+        if tr.Hit and tr.HitPos.z > 50 and tr.HitPos.z < 1000 and mat == "gravel" then table.insert(positions, tr.HitPos + Vector(0, 0, 10)) end
     end
     return positions
 end
@@ -106,7 +129,7 @@ function SpawningSystem.SpawnChickens()
             ent:SetPos(pos)
             ent:Spawn()
             ent:Activate()
-            //ent:SetModelScale(1.75, 0)
+            --ent:SetModelScale(1.75, 0)
             ent:DropToFloor()
             spawnedCount = spawnedCount + 1
         end
@@ -124,7 +147,7 @@ function SpawningSystem.SpawnTrees()
             ent:SetPos(pos - Vector(0, 0, 50))
             ent:Spawn()
             ent:Activate()
-            //ent:SetModelScale(1.75, 0)
+            --ent:SetModelScale(1.75, 0)
             ent:DropToFloor()
             spawnedCount = spawnedCount + 1
             local trace = util.TraceLine({
@@ -241,7 +264,6 @@ end
 -- Main spawning function
 function SpawningSystem.SpawnAll()
     Logger("[Spawning] Starting entity spawning on map: " .. game.GetMap())
-    
     SpawningSystem.SpawnTrees()
     timer.Simple(1, function() SpawningSystem.SpawnChickens() end)
     timer.Simple(2, function() SpawningSystem.SpawnHemp() end)
