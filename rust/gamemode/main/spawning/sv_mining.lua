@@ -96,9 +96,7 @@ gRust.Mining.MineOres = function(ply, ent, weapon, class, dmg)
     ent:SetNW2Vector("Weakspot", worldPos)
     local weakspot = ent:LocalToWorld(worldPos)
     local hitpos = ply:GetEyeTrace().HitPos
-    print(hitpos:Distance(worldPos))
     local dist = hitpos:Distance(worldPos)
-    print("Distance to weakspot:", dist)
     if dist < 20 then
         ent:EmitSound("farming/flare_hit.wav")
         ply:GiveItem(seq.item, reward * 2, seq.item)

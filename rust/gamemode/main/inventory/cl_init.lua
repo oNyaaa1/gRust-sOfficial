@@ -95,12 +95,10 @@ function DoDrop(self, droppedPanels, bDoDrop)
         return -- Exit here, don't drop to world
     end
 
-    -- bDoDrop is FALSE here - means not dropped on any valid slot
-    -- Prevent multiple world drops
     if dragged.HasDropped then return end
     if not IsValid(fram1) then return end
-    -- Check if outside the inventory panel
-    local isOutside = not (fram1:IsHovered() or fram1:IsChildHovered())
+    -- Check if outside the inventory pane
+    local isOutside = self.Drop == true
     if isOutside then
         dragged.HasDropped = true
         net.Start("gRustDropInv")
@@ -109,41 +107,6 @@ function DoDrop(self, droppedPanels, bDoDrop)
         net.WriteFloat(dragged.OldSlot)
         net.SendToServer()
         dragged:Remove()
-        timer.Simple(0.1, function() if IsValid(dragged) then dragged.HasDropped = false end end)
-    end
-end
-
-function DoDrop(self, droppedPanels, bDoDrop)
-    local dragged = droppedPanels[1] -- panel being dragged
-    local target = self -- slot receiving the drop
-    -- If dropped on a valid slot
-    if bDoDrop then
-        if dragged.OldSlot ~= target.CodeSortID then
-            net.Start("gRustWriteSlot")
-            net.WriteFloat(target.CodeSortID) -- new slot
-            net.WriteString(dragged.Weap) -- weapon/item id
-            net.WriteFloat(dragged.OldSlot) -- old slot
-            net.SendToServer()
-        end
-
-        dragged:SetParent(target)
-        return -- Exit here, don't drop to world
-    end
-
-    -- bDoDrop is FALSE here - means not dropped on any valid slot
-    -- Prevent multiple world drops
-    if dragged.HasDropped then return end
-    if not IsValid(fram1) then return end
-    -- Check if outside the inventory panel
-    local isOutside = fram1:IsHovered() and self == fram1
-    if isOutside then
-        dragged.HasDropped = true
-        net.Start("gRustDropInv")
-        net.WriteFloat(-1) -- -1 = world
-        net.WriteString(dragged.Weap)
-        net.WriteFloat(dragged.OldSlot)
-        net.SendToServer()
-        --dragged:Remove()
         timer.Simple(0.1, function() if IsValid(dragged) then dragged.HasDropped = false end end)
     end
 end
@@ -158,14 +121,14 @@ surface.CreateFont("RustHudBig", {
 
 function GM:ScoreboardShow()
     fram1 = vgui.Create("DPanel", frame)
-    fram1:SetSize(w, h)
+    fram1:SetSize(w, h - 120)
     fram1:SetPos(0, 0)
-    fram1.CodeSortID = -1
-    //fram1:Receiver("DroppableRust", DoDrop)
+    fram1.Drop = true
+    fram1:Receiver("DroppableRust", DoDrop)
     fram1.Paint = function(s, ww, hh) draw.RoundedBox(0, 0, 0, ww, hh, Color(65, 65, 65, 0)) end
     frame2 = vgui.Create("DPanel", fram1)
     frame2:SetSize(500, 417)
-    frame2:SetPos(w * 0.35, h * 0.40)
+    frame2:SetPos(w * 0.35, h * 0.406)
     frame2.Paint = function(s, ww, hh) draw.RoundedBox(0, 0, 0, ww, hh, Color(65, 65, 65, 255)) end
     local grid2 = vgui.Create("ThreeGrid", frame2)
     grid2:Dock(FILL)

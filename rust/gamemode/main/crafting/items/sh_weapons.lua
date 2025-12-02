@@ -5,6 +5,8 @@ ITEMS:RegisterItem("AK47", {
     model = "materials/items/weapons/assault_rifle.png",
     Weapon = "rust_ak47",
     Count = 1,
+    StackSize = 1,
+    Stackable = false,
     Craft = function()
         return {
             {
@@ -26,6 +28,8 @@ ITEMS:RegisterItem("M249", {
     model = "materials/items/weapons/m249.png",
     Weapon = "rusts_m249",
     Count = 1,
+    StackSize = 1,
+    Stackable = false,
     Craft = function()
         return {
             {
@@ -47,6 +51,8 @@ ITEMS:RegisterItem("Rock", {
     model = "materials/items/tools/rock.png",
     Weapon = "rust_wrock",
     Count = 1,
+    StackSize = 1,
+    Stackable = false,
     Craft = function()
         return {
             {
@@ -68,6 +74,8 @@ ITEMS:RegisterItem("Stone Pickaxe", {
     model = "materials/items/tools/stone_pickaxe.png",
     Weapon = "tfa_rustalpha_stone_hatchet",
     Count = 1,
+    StackSize = 1,
+    Stackable = false,
     Craft = function()
         return {
             {
@@ -93,6 +101,8 @@ ITEMS:RegisterItem("Hatchet", {
     model = "materials/items/tools/hatchet.png",
     Weapon = "tfa_rustalpha_hatchet",
     Count = 1,
+    StackSize = 1,
+    Stackable = false,
     Craft = function()
         return {
             {
@@ -118,6 +128,8 @@ ITEMS:RegisterItem("Pickaxe", {
     model = "materials/items/tools/pickaxe.png",
     Weapon = "tfa_rustalpha_pickaxe",
     Count = 1,
+    StackSize = 1,
+    Stackable = false,
     Craft = function()
         return {
             {

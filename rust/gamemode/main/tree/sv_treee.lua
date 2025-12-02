@@ -31,6 +31,7 @@ local WOOD_WEAPONS = {
         mult = 1
     }
 }
+
 local WOOD_SEQ = {6, 14, 22, 32, 43, 55, 68, 83, 99, 128}
 function SendTreeHit(ply, ent, class)
     if ent == nil then
@@ -55,34 +56,30 @@ function SendTreeHit(ply, ent, class)
     if not ent.NoMarker then
         ent.HotspotPos = ent.HitPos
         ent.LastPos = ent.HitPos
-        net.Start("gRust.TreeEffects")
-        net.WriteVector(ent.LastPos)
-        net.WriteAngle(Angle(ply:GetAngles().x, ply:GetAngles().y, ply:GetAngles().z))
-        net.WriteEntity(ent)
-        net.Broadcast()
         ent.NoMarker = true
     end
 
     local idx = math.min(ent.treeHits, #WOOD_SEQ)
     local reward = 0
-
     if dist <= 10 then
         local tool = WOOD_WEAPONS[class]
         reward = math.Round(WOOD_SEQ[idx] * tool.mult)
         ent.HotspotPos = ent.HitPos
         ent.LastPos = ent.HitPos
-        net.Start("gRust.TreeEffects")
-        net.WriteVector(ent.LastPos)
-        net.WriteAngle(Angle(ply:GetAngles().x, ply:GetAngles().y, ply:GetAngles().z))
-        net.WriteEntity(ent)
-        net.Broadcast()
         ply:EmitSound("combat/hitmarker.wav")
         --PickleAdillyEdit(ply, "Wood", reward)
-        ply:GiveItem("Wood", reward,"Wood")
+        ply:GiveItem("Wood", reward, "Wood")
     elseif dist > 10 then
         reward = math.Round(WOOD_SEQ[idx])
-        ply:GiveItem("Wood", reward,"Wood")
+        ply:GiveItem("Wood", reward, "Wood")
     end
+
+    net.Start("gRust.TreeEffects")
+    net.WriteVector(ent.LastPos)
+    net.WriteAngle(Angle(ply:GetAngles().x, ply:GetAngles().y, ply:GetAngles().z))
+    net.WriteEntity(ent)
+    net.WriteFloat(ent.TreeHealth)
+    net.Broadcast()
 end
 
 local function MakeTreeFall(ent)

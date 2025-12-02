@@ -40,6 +40,38 @@ function FindValidSlotBackWards(ply, select_Slot)
     return SlotByDefault
 end
 
+function FindValidSlotfw(ply, select_Slot)
+    if select_Slot then return select_Slot end
+    local SlotByDefault = 1
+    local FoundSlot = false
+    for i = 1, 36 do
+        if ply.tbl[i] == nil then
+            ply.tbl[i] = {
+                SlotFree = true
+            }
+        end
+    end
+
+    for i = 1, 6 do
+        if ply.tbl[i] and ply.tbl[i].SlotFree == true then
+            SlotByDefault = i
+            FoundSlot = true
+            break
+        end
+    end
+
+    if FoundSlot == false then
+        for i = 7, 36 do
+            if ply.tbl[i].SlotFree == true then
+                SlotByDefault = i
+                FoundSlot = true
+                break
+            end
+        end
+    end
+    return SlotByDefault
+end
+
 local FindSlot = function(ply, item)
     local itemz = ITEMS:GetItem(item)
     for k, v in pairs(ply.tbl) do
@@ -69,7 +101,6 @@ function IsInvFull(ply)
     for i = 1, #ply.tbl do
         if ply.tbl[i] and ply.tbl[i].SlotFree == true then FoundSlot = true end
     end
-
     return FoundSlot
 end
 
@@ -90,13 +121,23 @@ function PickleAdillyEdit(ply, wep, amount)
     local slot = FindSlot(ply, wep)
     if slot == nil and amount > 0 then
         ply:SetNWFloat(wep, amount)
-        local sloto = FindValidSlotBackWards(ply)
-        ply.tbl[sloto] = {
-            Slotz = sloto,
-            Weapon = wep,
-            Img = itemz.model,
-            Amount = math.Clamp(amount, 1, itemz.StackSize or 0),
-        }
+        if itemz.Category == "Weapons" then
+            local sloto = FindValidSlotfw(ply)
+            ply.tbl[sloto] = {
+                Slotz = sloto,
+                Weapon = wep,
+                Img = itemz.model,
+                Amount = math.Clamp(amount, 1, itemz.StackSize or 0),
+            }
+        else
+            local sloto = FindValidSlotBackWards(ply)
+            ply.tbl[sloto] = {
+                Slotz = sloto,
+                Weapon = wep,
+                Img = itemz.model,
+                Amount = math.Clamp(amount, 1, itemz.StackSize or 0),
+            }
+        end
 
         net.Start("DragNDropRust")
         net.WriteTable(ply.tbl)
@@ -143,14 +184,23 @@ function PickleAdillyEdit(ply, wep, amount)
 
     if adding and amount > 0 then
         ply:SetNWFloat(wep, amount)
-        local sloto = FindValidSlotBackWards(ply)
-        ply.tbl[sloto] = {
-            Slotz = sloto,
-            Weapon = wep,
-            Img = itemz.model,
-            Amount = math.Clamp(amount or 0, 1, itemz.StackSize),
-            SlotFree = false,
-        }
+        if itemz.Category == "Weapons" then
+            local sloto = FindValidSlotfw(ply)
+            ply.tbl[sloto] = {
+                Slotz = sloto,
+                Weapon = wep,
+                Img = itemz.model,
+                Amount = math.Clamp(amount, 1, itemz.StackSize or 0),
+            }
+        else
+            local sloto = FindValidSlotBackWards(ply)
+            ply.tbl[sloto] = {
+                Slotz = sloto,
+                Weapon = wep,
+                Img = itemz.model,
+                Amount = math.Clamp(amount, 1, itemz.StackSize or 0),
+            }
+        end
 
         net.Start("DragNDropRust")
         net.WriteTable(ply.tbl)
@@ -255,7 +305,7 @@ net.Receive("gRustWriteSlot", function(len, ply)
         local newAmount = targetItem.Amount + fromItem.Amount
         -- Clamp to max stack size
         local maxSize = itemz.StackSize or 1
-        local clamped = math.Clamp(newAmount, 0, maxSize)
+        local clamped = math.Clamp(newAmount, 1, maxSize)
         -- Set target slot to clamped amount
         targetItem.Amount = clamped
         -- Overflow handling
@@ -308,7 +358,7 @@ net.Receive("gRustWriteSlot", function(len, ply)
 end)
 
 net.Receive("gRustDropInv", function(len, ply)
-    if true then return end
+    --if true then return end
     local targetID = net.ReadFloat() -- -1 = world, otherwise ent index
     local itemID = net.ReadString()
     local fromSlot = net.ReadFloat()
@@ -318,10 +368,6 @@ net.Receive("gRustDropInv", function(len, ply)
     if not invItem then return end
     -- Case: drop to world
     if targetID == -1 then
-        ply.tbl[fromSlot] = {
-            SlotFree = true
-        }
-
         local dropPos = ply:GetShootPos() + ply:GetAimVector() * 30
         local ent = ents.Create("rust_item")
         if IsValid(ent) then
@@ -330,11 +376,16 @@ net.Receive("gRustDropInv", function(len, ply)
             ent:SetCount(invItem.Amount or 1)
             ent:Spawn()
             ent:Activate()
+            print(dropPos,itemID,invItem.Amount)
         else
             print("[gRustDropInv] failed to create rust_item")
         end
 
         ply.tbl[fromSlot] = {}
+        ply.tbl[fromSlot] = {
+            SlotFree = true
+        }
+
         -- sync & return
         net.Start("DragNDropRust")
         net.WriteTable(ply.tbl)

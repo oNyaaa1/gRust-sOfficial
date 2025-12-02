@@ -20,6 +20,7 @@ if SERVER then
 		-- timeout auto-remove to avoid clutter
 		self.RemoveTime = CurTime() + 600 -- 10 minutes
 		timer.Simple(0.5, function() constraint.Weld(self, Entity(0), 0, 0, 0, true, true) end)
+		self.Cooled = 0
 	end
 
 	function ENT:Think()
@@ -110,6 +111,8 @@ if SERVER then
 
 	-- When a player touches / uses the item, give it to them (simple pickup)
 	function ENT:Use(activator, caller)
+		if self.Cooled >= CurTime() then return end
+		self.Cooled = CurTime() + 1
 		if not IsValid(activator) or not activator:IsPlayer() then return end
 		-- your pickup logic here; example: give into player's inventory table
 		local itemID = self:GetItem()
