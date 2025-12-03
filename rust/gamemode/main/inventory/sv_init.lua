@@ -219,7 +219,7 @@ end
 
 function meta:GiveItem(item, amount, itm)
     local itmz = PickleAdillyEdit(self, item, amount)
-    if itmz ~= "Inventory Full" then self:SendNotification(item, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. " (" .. self:CalcTotal(item) or 0 .. ") ") end
+    if itmz ~= "Inventory Full" then self:SendNotification(item, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. " (" .. self:CalcTotal(item) or 0 .. " ") end
     return true
 end
 
@@ -274,10 +274,9 @@ net.Receive("gRustSelectWep", function(len, ply)
     local id = net.ReadFloat()
     local proxy_wep = net.ReadString()
     local itemz = ITEMS:GetItem(proxy_wep)
-    if not itemz then return end
-    if id >= 1 and id <= 6 then
+    if itemz and id >= 1 and id <= 6 then
         ply:SelectWeapon(itemz.Weapon)
-    else
+    elseif id == -1 then
         ply:SelectWeapon("rust_hands")
     end
 end)
