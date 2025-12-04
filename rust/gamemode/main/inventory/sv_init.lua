@@ -375,7 +375,6 @@ net.Receive("gRustDropInv", function(len, ply)
             ent:SetCount(invItem.Amount or 1)
             ent:Spawn()
             ent:Activate()
-            print(dropPos,itemID,invItem.Amount)
         else
             print("[gRustDropInv] failed to create rust_item")
         end

@@ -8,13 +8,11 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-Fixed minimap not being accurate
-Added ) to notification
-Added recycler [Does nothing atm]
-Fixed dragndrop works on mouse release now!
-Swapping weapons from rock to hands works fine now!
-
-
+Fixed not being able to slot on hotbar
+Fixed not being able to drag from hotbar to entity nests
+Fixed not being able to swap to hands and item of weapon
+Added Daddy mode
+Fixed and repaired Recycler [Still in works]
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")

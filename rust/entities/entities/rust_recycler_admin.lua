@@ -5,12 +5,9 @@ ENT.PrintName = "Recycler"
 ENT.Category = ""
 ENT.Spawnable = true
 ENT.AdminOnly = false
-ENT.INPUT = {}
-ENT.OUTPUT = {}
 if SERVER then
 	util.AddNetworkString("DockMain")
 	util.AddNetworkString("gRustRecycler")
-	util.AddNetworkString("Rust_recyclerInv")
 	function ENT:Initialize()
 		self:SetModel("models/environment/misc/recycler.mdl")
 		self:PhysicsInit(SOLID_VPHYSICS)
@@ -37,9 +34,7 @@ if SERVER then
 
 	net.Receive("gRustRecycler", function(len, ply)
 		local str = net.ReadString()
-		local ent = net.ReadEntity()
-		if not ent.data then ent.data = {} end
-		table.insert(ent.data, {slotid, str})
+		print(str)
 	end)
 
 	function ENT:Think()
@@ -51,10 +46,6 @@ if SERVER then
 	function ENT:Use(btn, ply)
 		net.Start("DockMain")
 		net.WriteEntity(self)
-		net.WriteTable(self.data or {})
-		net.Send(ply)
-		net.Start("DragNDropRust")
-		net.WriteTable(ply.tbl)
 		net.Send(ply)
 	end
 
@@ -79,10 +70,11 @@ if CLIENT then
 	local function DoDrop(self, droppedPanels, bDoDrop)
 		local dragged = droppedPanels[1] -- panel being dragged
 		local target = self -- slot receiving the drop
+		-- If dropped on a valid slot
+		print(dragged.Weap, target.CodeSortID)
 		if bDoDrop then
 			net.Start("gRustRecycler")
 			net.WriteString(dragged.Weap) -- weapon/item id
-			net.WriteEntity(target.IDEnt)
 			net.SendToServer()
 			dragged:SetParent(target)
 			return -- Exit here, don't drop to world
@@ -93,7 +85,6 @@ if CLIENT then
 	local ent = NULL
 	net.Receive("DockMain", function()
 		ent = net.ReadEntity()
-		local data = net.ReadTable()
 		if IsValid(Container) then Container:Remove() end
 		local frameWork = DockInventory()
 		if not frameWork[1] then return end
@@ -133,6 +124,9 @@ if CLIENT then
 		ToggleButton:SetWide(ScrW() * 0.11)
 		ToggleButton.Think = function(me) end
 		ToggleButton.DoClick = function(me) self:Togglez() end
+		------------------------------------------------------------------------
+		-- unified function for creating inventory rows (input/output/etc.)
+		------------------------------------------------------------------------
 		gui.EnableScreenClicker(true)
 		local grid2 = vgui.Create("ThreeGrid", ContainerR)
 		grid2:Dock(FILL)
@@ -151,7 +145,6 @@ if CLIENT then
 			Name:SetTall(100)
 			Name:SetWide(500)
 			Name:Receiver("DroppableRust", DoDrop)
-			Name.IDEnt = ent
 			Name.Paint = function(me, w, h)
 				surface.SetDrawColor(80, 76, 70, 100)
 				surface.DrawRect(0, 0, w, h)
@@ -166,7 +159,6 @@ if CLIENT then
 			Name:SetTall(100)
 			Name:SetWide(500)
 			Name:Receiver("DroppableRust", DoDrop)
-			Name.IDEnt = ent
 			Name.Paint = function(me, w, h)
 				surface.SetDrawColor(80, 76, 70, 100)
 				surface.DrawRect(0, 0, w, h)

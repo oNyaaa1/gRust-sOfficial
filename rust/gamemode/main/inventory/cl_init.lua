@@ -8,6 +8,39 @@ local DermaImageButton = {}
 local pnl1 = {}
 local pnl2 = {}
 local fram1 = nil
+local function DoDrop(self, droppedPanels, bDoDrop)
+    local dragged = droppedPanels[1] -- panel being dragged
+    local target = self -- slot receiving the drop
+    -- If dropped on a valid slot and target.CodeSortID > 0 
+    if bDoDrop then
+        if dragged.OldSlot ~= target.CodeSortID then
+            net.Start("gRustWriteSlot")
+            net.WriteFloat(target.CodeSortID) -- new slot
+            net.WriteString(dragged.Weap) -- weapon/item id
+            net.WriteFloat(dragged.OldSlot) -- old slot
+            net.SendToServer()
+            if IsValid(DermaImageButton[dragged.OldSlot]) then DermaImageButton[dragged.OldSlot] = nil end
+        end
+
+        dragged:SetParent(target)
+        return -- Exit here, don't drop to world
+    end
+
+    if dragged.HasDropped then return end
+    if not IsValid(fram1) then return end
+    local isOutside = self.Drop == true
+    if bDoDrop == true and isOutside then
+        dragged.HasDropped = true
+        net.Start("gRustDropInv")
+        net.WriteFloat(-1) -- -1 = world
+        net.WriteString(dragged.Weap)
+        net.WriteFloat(dragged.OldSlot)
+        net.SendToServer()
+        dragged:Remove()
+        timer.Simple(0.1, function() if IsValid(dragged) then dragged.HasDropped = false end end)
+    end
+end
+
 local function ClearSlots(tbl2)
     if IsValid(pnl2) then pnl2:Remove() end
     pnl1 = {}
@@ -60,7 +93,7 @@ local function ClearSlots(tbl2)
         DermaImageButton[v.Slotz].DoClick = function() MsgN("You clicked the image!") end
         DermaImageButton[v.Slotz].Model_IMG = v.Img
         DermaImageButton[v.Slotz].Weap = v.Weapon
-        DermaImageButton[v.Slotz].OldSlot = v.Slotz or -1
+        DermaImageButton[v.Slotz].OldSlot = v.Slotz
         DermaImageButton[v.Slotz]:SetMouseInputEnabled(true)
         DermaImageButton[v.Slotz].Paint = function(s, ww, hh)
             if s:IsHovered() then
@@ -77,38 +110,6 @@ net.Receive("DragNDropRust", function()
     local en = net.ReadBool()
     ClearSlots(gRustJas.Inventory)
 end)
-
-local function DoDrop(self, droppedPanels, bDoDrop)
-    local dragged = droppedPanels[1] -- panel being dragged
-    local target = self -- slot receiving the drop
-    -- If dropped on a valid slot
-    if bDoDrop and target.CodeSortID > 0 then
-        if dragged.OldSlot ~= target.CodeSortID then
-            net.Start("gRustWriteSlot")
-            net.WriteFloat(target.CodeSortID) -- new slot
-            net.WriteString(dragged.Weap) -- weapon/item id
-            net.WriteFloat(dragged.OldSlot) -- old slot
-            net.SendToServer()
-        end
-
-        dragged:SetParent(target)
-        return -- Exit here, don't drop to world
-    end
-
-    if dragged.HasDropped then return end
-    if not IsValid(fram1) then return end
-    local isOutside = self.Drop == true
-    if bDoDrop == true and isOutside then
-        dragged.HasDropped = true
-        net.Start("gRustDropInv")
-        net.WriteFloat(-1) -- -1 = world
-        net.WriteString(dragged.Weap)
-        net.WriteFloat(dragged.OldSlot)
-        net.SendToServer()
-        dragged:Remove()
-        timer.Simple(0.1, function() if IsValid(dragged) then dragged.HasDropped = false end end)
-    end
-end
 
 surface.CreateFont("RustHudBig", {
     font = "Arial",
@@ -143,7 +144,7 @@ function DockInventory()
             pnl2[i] = vgui.Create("DPanel")
             pnl2[i]:SetTall(80)
             pnl2[i]:SetWide(180)
-            pnl2[i].CodeSortID = i or -1
+            pnl2[i].CodeSortID = i
             pnl2[i]:Receiver("DroppableRust", DoDrop)
             pnl2[i].Paint = function(s, ww, hh)
                 if s:IsHovered() then
@@ -176,7 +177,7 @@ function DockInventory()
         DermaImageButton[v.Slotz].Model_IMG = v.Img
         DermaImageButton[v.Slotz]:SetMouseInputEnabled(true)
         DermaImageButton[v.Slotz].Weap = v.Weapon
-        DermaImageButton[v.Slotz].OldSlot = v.Slotz or -1
+        DermaImageButton[v.Slotz].OldSlot = v.Slotz
         -- On release, check if we are over another slot
         --DermaImageButton[k].OnMouseReleased = function(self, mc)
         --    if mc ~= MOUSE_LEFT then return end
@@ -191,7 +192,7 @@ function DockInventory()
             end
         end
     end
-    return {fram1,frame2}
+    return {fram1, frame2}
 end
 
 local DockInventory1
@@ -224,7 +225,6 @@ hook.Add("PlayerBindPress", "Bindpressgturst", function(ply, bind, pressed)
         net.WriteString(DermaImageButton[num].Weap or "")
         net.SendToServer()
     elseif DermaImageButton[num] == nil then
-        print(-1, "")
         net.Start("gRustSelectWep")
         net.WriteFloat(-1)
         net.WriteString("")
