@@ -8,11 +8,12 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
 end
 
 --[[
-Fixed not being able to slot on hotbar
-Fixed not being able to drag from hotbar to entity nests
-Fixed not being able to swap to hands and item of weapon
-Added Daddy mode
-Fixed and repaired Recycler [Still in works]
+Fixed dragndrop hopefully
+Fixed another inventory bug not freeing up slots
+Fixed minor bug on drag and drop duplicates
+Redesigned alot of the code
+
+
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")

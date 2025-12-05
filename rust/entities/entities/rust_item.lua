@@ -19,7 +19,7 @@ if SERVER then
 		if not self:GetNWInt("rust_item_count", 0) then self:SetNWInt("rust_item_count", 0) end
 		-- timeout auto-remove to avoid clutter
 		self.RemoveTime = CurTime() + 600 -- 10 minutes
-		timer.Simple(0.5, function() constraint.Weld(self, Entity(0), 0, 0, 0, true, true) end)
+		//timer.Simple(0.5, function() constraint.Weld(self, Entity(0), 0, 0, 0, true, true) end)
 		self.Cooled = 0
 	end
 
@@ -44,49 +44,6 @@ if SERVER then
 				end
 			end
 		end
-	end
-
-	function ENT:AddItem(itemID, amount, ply)
-		amount = tonumber(amount) or 1
-		if not ITEMS or not ITEMS:GetItem(itemID) then return false, "No ITEMS table" end
-		local info = ITEMS:GetItem(itemID)
-		if not info then return false, "Bad itemID" end
-		self.MaxSlots = self.MaxSlots or 6
-		-- Try to stack into existing slot first if item is stackable
-		if info.Stackable then
-			for i = 1, self.MaxSlots do
-				local slot = ply.tbl[i]
-				if slot and slot.Name == itemID then
-					slot.Amount = (slot.Amount or 0) + amount
-					-- clamp to StackSize
-					local max = info.StackSize or slot.Amount
-					if slot.Amount > max then
-						local overflow = slot.Amount - max
-						slot.Amount = max
-						-- return overflow to caller
-						return true, overflow
-					end
-					return true, 0
-				end
-			end
-		end
-
-		-- find empty slot
-		for i = 1, self.MaxSlots do
-			if not ply.tbl[i] then
-				ply.tbl[i] = {
-					Slotz = i,
-					Name = itemID,
-					Weapon = info.Weapon,
-					Img = info.model,
-					Amount = amount,
-					SlotFree = false
-				}
-				return true, 0
-			end
-		end
-		-- no space
-		return false, "No space"
 	end
 
 	function ENT:GetItem()
@@ -117,9 +74,8 @@ if SERVER then
 		-- your pickup logic here; example: give into player's inventory table
 		local itemID = self:GetItem()
 		local count = self:GetCount()
-		--caller:GiveItem(itemID,count)
-		PickleAdillyEdit(caller, itemID, count)
-		timer.Simple(0.5, function() if IsValid(self) then self:Remove() end end)
+		caller:GiveItem(itemID, count)
+		self:Remove()
 		-- fallback: if player can't receive, do nothing
 	end
 

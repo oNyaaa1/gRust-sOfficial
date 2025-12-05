@@ -67,7 +67,6 @@ function SendTreeHit(ply, ent, class)
         ent.HotspotPos = ent.HitPos
         ent.LastPos = ent.HitPos
         ply:EmitSound("combat/hitmarker.wav")
-        --PickleAdillyEdit(ply, "Wood", reward)
         ply:GiveItem("Wood", reward, "Wood")
     elseif dist > 10 then
         reward = math.Round(WOOD_SEQ[idx])

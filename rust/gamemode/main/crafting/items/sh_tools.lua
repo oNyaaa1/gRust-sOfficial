@@ -33,6 +33,8 @@ ITEMS:RegisterItem("Building Plan", {
     model = "materials/items/tools/building_plan.png",
     Weapon = "hands_builder",
     Count = 1,
+    StackSize = 1,
+    Stackable = false,
     Craft = function()
         return {
             {
@@ -54,6 +56,8 @@ ITEMS:RegisterItem("Hammer", {
     model = "materials/items/tools/hammer.png",
     Weapon = "hands_hammer",
     Count = 1,
+    StackSize = 1,
+    Stackable = false,
     Craft = function()
         return {
             {

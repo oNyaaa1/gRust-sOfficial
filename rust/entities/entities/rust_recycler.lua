@@ -24,6 +24,7 @@ if SERVER then
 		end
 
 		constraint.Weld(self, Entity(0), 0, 0, 0, true, true)
+		self.CD = 0
 	end
 
 	function ENT:SpawnFunction(ply, tr)
@@ -38,6 +39,9 @@ if SERVER then
 	net.Receive("gRustRecycler", function(len, ply)
 		local str = net.ReadString()
 		local ent = net.ReadEntity()
+		local slotid = net.ReadFloat()
+		if ent.CD >= CurTime() then return end
+		ent.CD = CurTime() + 1
 		if not ent.data then ent.data = {} end
 		table.insert(ent.data, {slotid, str})
 	end)
@@ -83,6 +87,7 @@ if CLIENT then
 			net.Start("gRustRecycler")
 			net.WriteString(dragged.Weap) -- weapon/item id
 			net.WriteEntity(target.IDEnt)
+			net.WriteFloat(target.IDID)
 			net.SendToServer()
 			dragged:SetParent(target)
 			return -- Exit here, don't drop to world
@@ -152,6 +157,7 @@ if CLIENT then
 			Name:SetWide(500)
 			Name:Receiver("DroppableRust", DoDrop)
 			Name.IDEnt = ent
+			Name.IDID = i
 			Name.Paint = function(me, w, h)
 				surface.SetDrawColor(80, 76, 70, 100)
 				surface.DrawRect(0, 0, w, h)

@@ -34,7 +34,7 @@ if SERVER then
 
 	net.Receive("gRustRecycler", function(len, ply)
 		local str = net.ReadString()
-		print(str)
+		--print(str)
 	end)
 
 	function ENT:Think()
