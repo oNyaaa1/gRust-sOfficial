@@ -7,11 +7,19 @@ for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
     resource.AddFile("sound/laced/" .. v)
 end
 
+for k, v in pairs(file.Find("sound/rmusic/*", "GAME")) do
+    resource.AddFile("sound/rmusic/" .. v)
+end
+
+for k, v in pairs(file.Find("sound/rsounds/*", "GAME")) do
+    resource.AddFile("sound/rsounds/" .. v)
+end
+
 --[[
-Fixed dragndrop hopefully
-Fixed another inventory bug not freeing up slots
-Fixed minor bug on drag and drop duplicates
-Redesigned alot of the code
+Added Weapon - Hatchet - Pickaxe to spawn with
+Fixed not being able to build
+Fixed crafting from being able to build unlimited items
+Fixed notification
 
 
 ]]

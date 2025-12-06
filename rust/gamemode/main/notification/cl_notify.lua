@@ -122,7 +122,7 @@ function gRust.AddNotification(value, type, icon, side)
             end
 
             draw.SimpleText(me.Value, "MyAweomseRustHud", h + Spacing, h * 0.5, Color(255, 255, 255, 255), 0, 1)
-            draw.SimpleText(me.Side .. ")", "MyAweomseRustHud", w - Padding * 3, h * 0.5, Color(255, 255, 255, 255), 2, 1)
+            draw.SimpleText("(" .. me.Side .. ")", "MyAweomseRustHud", w - Padding * 3, h * 0.5, Color(255, 255, 255, 255), 2, 1)
         end
     end
 

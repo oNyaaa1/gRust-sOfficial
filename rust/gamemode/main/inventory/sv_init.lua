@@ -255,7 +255,7 @@ end
 
 function meta:GiveItem(item, amount)
     local itmz = PickleAdillyEdit(self, item, amount)
-    if itmz ~= "Inventory Full" then self:SendNotification(item, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. " (" .. self:CalcTotal(item) or 0 .. " ") end
+    if itmz ~= "Inventory Full" then self:SendNotification(item, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. "/" ..self:CalcTotal(item) or 0 ) end
     return true
 end
 
@@ -267,19 +267,58 @@ function meta:TakeItem(item, amount, slotz)
         return false
     end
 
+    slotz = slotz or FindValidSlotBackWards(self, itemz)
     local ActualHasITem = false
     for k, v in pairs(self.tbl) do
         if v.Weapon == nil then continue end
         if v.Weapon == item then ActualHasITem = true end
     end
 
+    local slotss = 0
+    local adding = false
+    local editmode = false
+    local CurrentAmount = 0
+    for k, v in pairs(self.tbl) do
+        if not istable(v) then continue end
+        if v.Weapon == itemz.Name then
+            local amont = v.Amount or 0
+            if amont ~= nil and amont >= 1000 then
+                adding = true
+                slotss = k
+                CurrentAmount = amont
+            elseif v.Weapon == itemz.Name and amont < 1000 then
+                editmode = true
+                slotss = k
+                CurrentAmount = amont
+                break
+            end
+        end
+    end
+
+    if CurrentAmount < amount then
+        self:SendNotification("", NOTIFICATION_REMOVE, "materials/icons/bite.png", "Not enough " .. itemz.Name)
+        return false
+    end
+
+    print("curr", CurrentAmount)
     --if ActualHasITem == false then return end
-    self.tbl[-1] = nil -- Removes duplicate bug -- ChatGPT code
-    self.tbl[slotz] = nil
-    self.tbl[slotz] = {}
-    self.tbl[slotz] = {
-        SlotFree = true
+    self.tbl[slotss] = {
+        Slotz = slotss,
+        Weapon = itemz.Weapon,
+        Img = itemz.model,
+        Amount = CurrentAmount - amount,
+        SlotFree = false
     }
+
+    print(CurrentAmount)
+    if CurrentAmount <= 0 then
+        self.tbl[-1] = nil -- Removes duplicate bug -- ChatGPT code
+        self.tbl[slotz] = nil
+        self.tbl[slotz] = {}
+        self.tbl[slotz] = {
+            SlotFree = true
+        }
+    end
 
     self:SetNWFloat(itemz.Weapon, 0)
     self:SendNotification(item, NOTIFICATION_REMOVE, "materials/icons/bite.png", "Removed: " .. amount)
@@ -414,8 +453,9 @@ hook.Add("PlayerSpawn", "GiveITem", function(ply)
         }
     end
 
-    PickleAdillyEdit(ply, "Rock", 1)
-    --PickleAdillyEdit(ply, "AK47", 1)
+    PickleAdillyEdit(ply, "AK47", 1)
+    PickleAdillyEdit(ply, "Hatchet", 1)
+    PickleAdillyEdit(ply, "Pickaxe", 1)
     ply:Give("rust_hands")
     ply:SetNWInt("Hunger", math.random(90, 120))
     ply:SetNWInt("Thirst", math.random(90, 100))
@@ -435,6 +475,11 @@ hook.Add("PlayerSpawn", "GiveITem", function(ply)
 end)
 
 hook.Add("PlayerDeath", "GiveITem", function(vic, inf, attacker)
+    for k, v in pairs(vic.tbl) do
+        local itemz = ITEMS:GetItem(v)
+        vic:SetNWFloat(itemz.Weapon, 0)
+    end
+
     table.Empty(vic.tbl)
     net.Start("DragNDropRust")
     net.WriteTable(vic.tbl)

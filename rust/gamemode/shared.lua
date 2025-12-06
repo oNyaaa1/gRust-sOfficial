@@ -5,7 +5,7 @@ else
     DeriveGamemode("base")
 end
 
-GM.Name = "Rust | RUST IN GARRYSMOD"
+GM.Name = "WarZone | Terrority Based"
 function GM:Initialize()
     game.AddAmmoType({
         name = "AK47_AMMO", -- '#BULLET_PLAYER_556MM_ammo'
