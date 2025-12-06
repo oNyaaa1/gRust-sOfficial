@@ -43,27 +43,31 @@ end
 
 if SERVER then net.Receive("gRust_ServerModel", function(len, ply) ply.Selected = net.ReadString() end) end
 local Valid = {}
-local function IsFloatingStrict(ent, isClientGhost)
+local function IsFloatingStrict(ent)
     if not IsValid(ent) then return false end
+    local phys = ent:GetPhysicsObject()
+    if not IsValid(phys) then return false end
+    -- Get entity's bounding box
     local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
-    -- Start slightly above model bottom
-    local startBottom = ent:LocalToWorld(Vector(0, 0, mins.z + 2))
-    local endBottom = ent:LocalToWorld(Vector(0, 0, mins.z - 20))
-    local tr = util.TraceHull({
-        start = startBottom,
-        endpos = endBottom,
-        mins = Vector(mins.x + 1, mins.y + 1, 0),
-        maxs = Vector(maxs.x - 1, maxs.y - 1, 5),
-        mask = isClientGhost and MASK_SOLID or MASK_SOLID_BRUSHONLY,
-        filter = ent
+    local startPos = ent:GetPos()
+    local endPos = startPos + Vector(0, 0, mins.z - 2)
+    -- Choose mask based on whether we check props
+    local mask = MASK_SOLID_BRUSHONLY
+    local trace = util.TraceHull({
+        start = startPos,
+        endpos = endPos,
+        mins = Vector(mins.x * 0.8, mins.y * 0.8, 0),
+        maxs = Vector(maxs.x * 0.8, maxs.y * 0.8, 0),
+        filter = ent,
+        mask = mask
     })
-    return not tr.Hit
+    return trace.Hit and trace.HitWorld or (checkProps and IsValid(trace.Entity)) or false
 end
 
 if SERVER then
-    timer.Create("NoFloatingProps", 0.3, 0, function()
-        for _, ent in ipairs(ents.FindByClass("sent_foundation")) do
-            if IsFloatingStrict(ent, false) then ent:Remove() end
+    timer.Create("DestroyLeftOvers", 1, 0, function()
+        for k, v in pairs(ents.FindByClass("sent_foundation")) do
+            if not IsFloatingStrict(v) then v:Remove() end
         end
     end)
 end
@@ -87,8 +91,8 @@ function SWEP:PrimaryAttack()
     end
 
     if not bool then
-        ply:EmitSound("common/wpn_denyselect.wav")
-        return
+        --ply:EmitSound("common/wpn_denyselect.wav")
+        -- return
     end
 
     local canPlace = false
@@ -176,7 +180,6 @@ if CLIENT then
     local tbl = {}
     net.Receive("Rust_TableValid", function() tbl = net.ReadTable() end)
     function SWEP:Think()
-        if SERVER then return end
         if not IsFirstTimePredicted() then return end
         if Rust.Selected == nil then
             Rust.GhostEntity:Remove()
@@ -210,9 +213,9 @@ if CLIENT then
         if self.Pos then Rust.GhostEntity:SetPos(self.Pos) end
         if self.Ang then Rust.GhostEntity:SetAngles(self.Ang) end
         if IsFloatingStrict(Rust.GhostEntity, true) then
-            Rust.GhostEntity:SetColor(Color(255, 0, 0))
+            Rust.GhostEntity:SetColor(Color(255, 0, 0)) -- RED = floating/invalid
         else
-            Rust.GhostEntity:SetColor(Color(47, 47, 255))
+            Rust.GhostEntity:SetColor(Color(47, 47, 255)) -- BLUE = grounded/valid
         end
     end
 end

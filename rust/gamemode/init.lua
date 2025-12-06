@@ -16,11 +16,9 @@ for k, v in pairs(file.Find("sound/rsounds/*", "GAME")) do
 end
 
 --[[
-Added Weapon - Hatchet - Pickaxe to spawn with
-Fixed not being able to build
-Fixed crafting from being able to build unlimited items
-Fixed notification
-
+Fixed not being able to build :)
+Can now choose any map you like
+Can no longer build in air
 
 ]]
 util.AddNetworkString("gRust_ServerModel_new")

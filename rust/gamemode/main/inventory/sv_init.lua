@@ -6,7 +6,6 @@ util.AddNetworkString("gRustWriteSlot")
 util.AddNetworkString("gRustDropInv")
 resource.AddSingleFile("model/tree/treemarker.png")
 local meta = FindMetaTable("Player")
-hook.Add("InitPostEntity", "WipeStart", function() if game.GetMap() ~= "rust_fields" then game.ConsoleCommand("changelevel rust_fields\n") end end)
 hook.Add("GetFallDamage", "CSSFallDamage", function(ply, speed) return math.max(0, math.ceil(0.2418 * speed - 141.75)) end)
 function FindValidSlotBackWards(ply, item, select_Slot)
     if select_Slot then return select_Slot end
@@ -82,7 +81,10 @@ end
 function meta:CalcTotal(item)
     local total = 0
     for _, v in pairs(self.tbl) do
-        if istable(v) and v.Weapon == item then total = total + (v.Amount or 0) end
+        if v.Name == item then
+            total = total + (v.Amount or 0)
+            print(v.Amount, total, v.Name, item)
+        end
     end
     return total
 end
@@ -147,6 +149,7 @@ function PickleAdillyEdit(ply, wep, amount)
     local slot = FindValidSlotBackWards(ply, itemz)
     if editmode then
         ply.tbl[slotss] = {
+            Name = itemz.Name,
             Slotz = slotss,
             Weapon = wep,
             Img = itemz.model,
@@ -161,6 +164,7 @@ function PickleAdillyEdit(ply, wep, amount)
         if itemz.Weapon ~= "" then ply:Give(itemz.Weapon) end
     elseif slot ~= nil then
         ply.tbl[slot] = {
+            Name = itemz.Name,
             Slotz = slot,
             Weapon = wep,
             Img = itemz.model,
@@ -255,7 +259,7 @@ end
 
 function meta:GiveItem(item, amount)
     local itmz = PickleAdillyEdit(self, item, amount)
-    if itmz ~= "Inventory Full" then self:SendNotification(item, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. "/" ..self:CalcTotal(item) or 0 ) end
+    if itmz ~= "Inventory Full" then self:SendNotification(item, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. "/" .. self:CalcTotal(item) or 0) end
     return true
 end
 
@@ -277,7 +281,7 @@ function meta:TakeItem(item, amount, slotz)
     local slotss = 0
     local adding = false
     local editmode = false
-    local CurrentAmount = 0
+    local CurrentAmount = self:CalcTotal(itemz.Name)
     for k, v in pairs(self.tbl) do
         if not istable(v) then continue end
         if v.Weapon == itemz.Name then
@@ -285,16 +289,17 @@ function meta:TakeItem(item, amount, slotz)
             if amont ~= nil and amont >= 1000 then
                 adding = true
                 slotss = k
-                CurrentAmount = amont
+                --CurrentAmount = amont
             elseif v.Weapon == itemz.Name and amont < 1000 then
                 editmode = true
                 slotss = k
-                CurrentAmount = amont
+                --CurrentAmount = amont
                 break
             end
         end
     end
 
+    print(CurrentAmount, amount)
     if CurrentAmount < amount then
         self:SendNotification("", NOTIFICATION_REMOVE, "materials/icons/bite.png", "Not enough " .. itemz.Name)
         return false
@@ -371,6 +376,7 @@ net.Receive("gRustWriteSlot", function(len, ply)
         if overflow > 0 then
             -- Put leftover back into original slot
             ply.tbl[proxy_id] = {
+                Name = fromItem.Name,
                 Slotz = proxy_id,
                 Weapon = fromItem.Weapon,
                 Img = fromItem.Img,
@@ -387,6 +393,7 @@ net.Receive("gRustWriteSlot", function(len, ply)
         ------------------------------------
         -- place dragged item into target slot
         ply.tbl[id] = {
+            Name = itemz.Name,
             Slotz = id,
             Weapon = itemz.Name,
             Img = itemz.model,
@@ -397,6 +404,7 @@ net.Receive("gRustWriteSlot", function(len, ply)
         -- swap back if target was filled
         if targetItem then
             ply.tbl[proxy_id] = {
+                Name = itemz.Name,
                 Slotz = proxy_id,
                 Weapon = targetItem.Weapon,
                 Img = targetItem.Img,
