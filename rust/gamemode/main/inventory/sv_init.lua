@@ -83,7 +83,7 @@ function meta:CalcTotal(item)
     for _, v in pairs(self.tbl) do
         if v.Name == item then
             total = total + (v.Amount or 0)
-            print(v.Amount, total, v.Name, item)
+            //print(v.Amount, total, v.Name, item)
         end
     end
     return total

@@ -1,5 +1,5 @@
 local DPanel
-local MapMaterial = Material("materials/ui/grust_map.png")
+local MapMaterial = Material("ui/map.png")
 local PlayerMaterial = Material("icons/player_marker.png")
 local function VectorToMap(vec)
 	-- Map world coords to screen coords

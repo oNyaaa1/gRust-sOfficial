@@ -3,6 +3,7 @@ AddCSLuaFile("shared.lua")
 AddCSLuaFile("config.lua")
 include("config.lua")
 include("shared.lua")
+resource.AddSingleFile("materials/mapz/map.png")
 for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
     resource.AddFile("sound/laced/" .. v)
 end
@@ -15,10 +16,14 @@ for k, v in pairs(file.Find("sound/rsounds/*", "GAME")) do
     resource.AddFile("sound/rsounds/" .. v)
 end
 
+hook.Add("InitPostEntity", "MapChange", function()
+    -- 
+    if game.GetMap() ~= "rust_highland_v1_3a" then -- 
+        game.ConsoleCommand("changelevel rust_highland_v1_3a\n")
+    end
+end)
+
 --[[
-Fixed not being able to build :)
-Can now choose any map you like
-Can no longer build in air
 
 ]]
 util.AddNetworkString("gRust_ServerModel_new")

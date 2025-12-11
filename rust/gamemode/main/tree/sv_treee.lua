@@ -155,7 +155,8 @@ local TREE_MODELS = {
     ["models/props_foliage/coldstream_cedar_trunk.mdl"] = 170,
     ["models/props_foliage/ah_ash_tree_lg.mdl"] = 190
 }
---[[hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
+
+hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
     local MAT = BackwardsEnums("MAT_")
     local ply = dmginfo:GetAttacker()
     if not IsValid(ply) then return end
@@ -174,15 +175,14 @@ local TREE_MODELS = {
         ent.treeHealth, ent.treeHits = ent.treeHealth - 20, ent.treeHits + 1
         local idx = math.min(ent.treeHits, #WOOD_SEQ)
         local reward = math.Round(WOOD_SEQ[idx])
-        --PickleAdillyEdit(ply, "Wood", reward)
+        ply:GiveItem("Wood", reward)
         if ent.treeHealth <= 0 then
-            --SendTreeHit(ply, nil)
-            --MakeTreeFall(ent)
-            -- return
+            SendTreeHit(ply, nil)
+            MakeTreeFall(ent)
+            return
         else
-           
         end
     end
 
     if ent:GetClass() == "sent_rocks" then end
-end)]]
+end)

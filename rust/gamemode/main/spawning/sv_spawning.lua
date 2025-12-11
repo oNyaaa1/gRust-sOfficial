@@ -264,7 +264,7 @@ end
 -- Main spawning function
 function SpawningSystem.SpawnAll()
     Logger("[Spawning] Starting entity spawning on map: " .. game.GetMap())
-    SpawningSystem.SpawnTrees()
+    //SpawningSystem.SpawnTrees()
     timer.Simple(1, function() SpawningSystem.SpawnChickens() end)
     timer.Simple(2, function() SpawningSystem.SpawnHemp() end)
     timer.Simple(3, function() SpawningSystem.SpawnRoadSigns() end)

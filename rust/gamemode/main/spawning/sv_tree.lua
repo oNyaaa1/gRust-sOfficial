@@ -90,6 +90,8 @@ local function MakeTreeFall(ent)
     end)
 end
 
+
+
 gRust.Mining.MineTrees = function(ply, ent, maxHP, weapon, class)
     if not ply.Wood_Cutting_Tool then ply.Wood_Cutting_Tool = 0 end
     if ply.Wood_Cutting_Tool > CurTime() then return end
