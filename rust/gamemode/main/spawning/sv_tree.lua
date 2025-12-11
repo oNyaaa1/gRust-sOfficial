@@ -105,7 +105,7 @@ gRust.Mining.MineTrees = function(ply, ent, maxHP, weapon, class)
         if ent.Hitted == false then SendTreeHit(ply, ent, class) end
         ent.Hitted = true
         ent.treeHealth = 0
-        MakeTreeFall(ent)
+        //MakeTreeFall(ent)
     elseif ent.treeHealth > 0 then
         SendTreeHit(ply, ent, class)
     end

@@ -117,6 +117,7 @@ surface.CreateFont("RustHudBig", {
     bold = true,
 })
 
+local bground = Material("ui/background_linear.png", "noclamp smooth")
 function DockInventory()
     if IsValid(fram1) then fram1:Remove() end
     fram1 = vgui.Create("DPanel", frame)
@@ -125,7 +126,13 @@ function DockInventory()
     fram1.Drop = true
     fram1.CodeSortID = -1
     fram1:Receiver("DroppableRust", DoDrop)
-    fram1.Paint = function(s, ww, hh) draw.RoundedBox(0, 0, 0, ww, hh, Color(65, 65, 65, 100)) end
+    fram1.Paint = function(s, ww, hh)
+        surface.SetMaterial(bground)
+        surface.SetDrawColor(color_white)
+        surface.DrawTexturedRect(0, 0, w, h)
+    end
+
+    --ui/background_linear.png //draw.RoundedBox(0, 0, 0, ww, hh, Color(65, 65, 65, 100)) end
     frame2 = vgui.Create("DPanel", fram1)
     frame2:SetSize(500, 417)
     frame2:SetPos(w * 0.35, h * 0.406)

@@ -24,7 +24,14 @@ hook.Add("InitPostEntity", "MapChange", function()
 end)
 
 --[[
+Added:
+Fuzzy background over inventory
+Fixed a bug when tree is falling
+Fixed not removing wood when crafting it would add a total (total < amount)
 
+Removed:
+Glitchy Trees when falling and earning wood
+Removed CurrentAmount and changed to CurrentAmount = 0
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")

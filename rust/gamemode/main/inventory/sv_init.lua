@@ -83,7 +83,7 @@ function meta:CalcTotal(item)
     for _, v in pairs(self.tbl) do
         if v.Name == item then
             total = total + (v.Amount or 0)
-            //print(v.Amount, total, v.Name, item)
+            --print(v.Amount, total, v.Name, item)
         end
     end
     return total
@@ -281,7 +281,7 @@ function meta:TakeItem(item, amount, slotz)
     local slotss = 0
     local adding = false
     local editmode = false
-    local CurrentAmount = self:CalcTotal(itemz.Name)
+    local CurrentAmount = 0 --
     for k, v in pairs(self.tbl) do
         if not istable(v) then continue end
         if v.Weapon == itemz.Name then
@@ -289,23 +289,22 @@ function meta:TakeItem(item, amount, slotz)
             if amont ~= nil and amont >= 1000 then
                 adding = true
                 slotss = k
-                --CurrentAmount = amont
+                CurrentAmount = amont
             elseif v.Weapon == itemz.Name and amont < 1000 then
                 editmode = true
                 slotss = k
-                --CurrentAmount = amont
+                CurrentAmount = amont
                 break
             end
         end
     end
 
-    print(CurrentAmount, amount)
-    if CurrentAmount < amount then
+    local total = self:CalcTotal(itemz.Name)
+    if total < amount then
         self:SendNotification("", NOTIFICATION_REMOVE, "materials/icons/bite.png", "Not enough " .. itemz.Name)
         return false
     end
 
-    print("curr", CurrentAmount)
     --if ActualHasITem == false then return end
     self.tbl[slotss] = {
         Slotz = slotss,
@@ -485,6 +484,7 @@ end)
 hook.Add("PlayerDeath", "GiveITem", function(vic, inf, attacker)
     for k, v in pairs(vic.tbl) do
         local itemz = ITEMS:GetItem(v)
+        if itemz == nil then return end
         vic:SetNWFloat(itemz.Weapon, 0)
     end
 

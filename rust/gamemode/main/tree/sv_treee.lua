@@ -33,7 +33,7 @@ local WOOD_WEAPONS = {
 }
 
 local WOOD_SEQ = {6, 14, 22, 32, 43, 55, 68, 83, 99, 128}
-function SendTreeHit(ply, ent, class)
+function SendTreeHit(ply, ent, class, hp)
     if ent == nil then
         net.Start("gRust.TreeEffects")
         net.WriteVector(Vector())
@@ -61,6 +61,7 @@ function SendTreeHit(ply, ent, class)
 
     local idx = math.min(ent.treeHits, #WOOD_SEQ)
     local reward = 0
+    print(dist)
     if dist <= 10 then
         local tool = WOOD_WEAPONS[class]
         reward = math.Round(WOOD_SEQ[idx] * tool.mult)
@@ -77,7 +78,7 @@ function SendTreeHit(ply, ent, class)
     net.WriteVector(ent.LastPos)
     net.WriteAngle(Angle(ply:GetAngles().x, ply:GetAngles().y, ply:GetAngles().z))
     net.WriteEntity(ent)
-    net.WriteFloat(ent.TreeHealth)
+    net.WriteFloat(ent.treeHealth)
     net.Broadcast()
 end
 
@@ -175,12 +176,11 @@ hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
         ent.treeHealth, ent.treeHits = ent.treeHealth - 20, ent.treeHits + 1
         local idx = math.min(ent.treeHits, #WOOD_SEQ)
         local reward = math.Round(WOOD_SEQ[idx])
-        ply:GiveItem("Wood", reward)
+        SendTreeHit(ply, ent, class,ent.treeHealth)
+        --ply:GiveItem("Wood", reward)
         if ent.treeHealth <= 0 then
-            SendTreeHit(ply, nil)
             MakeTreeFall(ent)
-            return
-        else
+        elseif ent.treeHealth > 0 then
         end
     end
 

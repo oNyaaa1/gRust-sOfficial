@@ -14,8 +14,18 @@ net.Receive("BuildingCrafting", function(len, pl)
 
     if not bool then return end
     pl.reached = timerz
-    
     timer.Create("TimerForCraft" .. tostring(pl:SteamID64()), 1, 0, function()
+        if not pl:Alive() then
+            pl.reached = nil
+            timer.Remove("TimerForCraft" .. tostring(pl:SteamID64()))
+            print("Timer Reached")
+            net.Start("crafting_Gear")
+            net.WriteString("")
+            net.WriteFloat(0)
+            net.Send(pl)
+            return
+        end
+
         pl.reached = pl.reached - 1
         net.Start("crafting_Gear")
         net.WriteString(wep)

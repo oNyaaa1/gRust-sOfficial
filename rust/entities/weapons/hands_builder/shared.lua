@@ -91,8 +91,8 @@ function SWEP:PrimaryAttack()
     end
 
     if not bool then
-        --ply:EmitSound("common/wpn_denyselect.wav")
-        -- return
+        ply:EmitSound("common/wpn_denyselect.wav")
+        return
     end
 
     local canPlace = false
