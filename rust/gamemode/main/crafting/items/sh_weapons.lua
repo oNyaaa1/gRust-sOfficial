@@ -1,9 +1,9 @@
-ITEMS:RegisterItem("AK47", {
-    Name = "AK47",
-    Info = "AK47 KAKAKAKAKAA",
+ITEMS:RegisterItem("Wand", {
+    Name = "Wand",
+    Info = "Wand Avadacobra",
     Category = "Weapons",
-    model = "materials/items/weapons/assault_rifle.png",
-    Weapon = "rust_ak47",
+    model = "materials/tree/wand.png",
+    Weapon = "rust_wand",
     Count = 1,
     StackSize = 1,
     Stackable = false,

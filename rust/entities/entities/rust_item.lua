@@ -74,7 +74,7 @@ if SERVER then
 		-- your pickup logic here; example: give into player's inventory table
 		local itemID = self:GetItem()
 		local count = self:GetCount()
-		caller:GiveItem(itemID, count)
+		caller:GiveItem(itemID, count, true)
 		self:Remove()
 		-- fallback: if player can't receive, do nothing
 	end

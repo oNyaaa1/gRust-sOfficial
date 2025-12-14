@@ -35,7 +35,7 @@ net.Receive("BuildingCrafting", function(len, pl)
             pl.reached = nil
             timer.Remove("TimerForCraft" .. tostring(pl:SteamID64()))
             print("Timer Reached")
-            pl:GiveItem(wep, itemz.Count)
+            pl:GiveItem(wep, itemz.Count, true)
         end
     end)
 end)

@@ -4,6 +4,9 @@ AddCSLuaFile("config.lua")
 include("config.lua")
 include("shared.lua")
 resource.AddSingleFile("materials/mapz/map.png")
+for k, v in pairs(file.Find("materials/tree/*", "GAME")) do
+    resource.AddFile("materials/tree/" .. v)
+end
 for k, v in pairs(file.Find("sound/laced/*", "GAME")) do
     resource.AddFile("sound/laced/" .. v)
 end
@@ -24,14 +27,10 @@ hook.Add("InitPostEntity", "MapChange", function()
 end)
 
 --[[
-Added:
-Fuzzy background over inventory
-Fixed a bug when tree is falling
-Fixed not removing wood when crafting it would add a total (total < amount)
+Fixed small bug on drop duplication
+Fixed wood not stacking
+Added Wand instead of AK47 (Shoot bullets for now)
 
-Removed:
-Glitchy Trees when falling and earning wood
-Removed CurrentAmount and changed to CurrentAmount = 0
 ]]
 util.AddNetworkString("gRust_ServerModel_new")
 util.AddNetworkString("gRust_ServerModel")

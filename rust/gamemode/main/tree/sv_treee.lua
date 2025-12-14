@@ -61,17 +61,16 @@ function SendTreeHit(ply, ent, class, hp)
 
     local idx = math.min(ent.treeHits, #WOOD_SEQ)
     local reward = 0
-    print(dist)
     if dist <= 10 then
         local tool = WOOD_WEAPONS[class]
         reward = math.Round(WOOD_SEQ[idx] * tool.mult)
         ent.HotspotPos = ent.HitPos
         ent.LastPos = ent.HitPos
         ply:EmitSound("combat/hitmarker.wav")
-        ply:GiveItem("Wood", reward, "Wood")
+        ply:GiveItem("Wood", reward, false)
     elseif dist > 10 then
         reward = math.Round(WOOD_SEQ[idx])
-        ply:GiveItem("Wood", reward, "Wood")
+        ply:GiveItem("Wood", reward, false)
     end
 
     net.Start("gRust.TreeEffects")

@@ -104,7 +104,8 @@ function IsInvFull(ply)
     return FoundSlot
 end
 
-function PickleAdillyEdit(ply, wep, amount)
+function PickleAdillyEdit(ply, wep, amount, tru)
+    tru = tru or false
     if IsInvFull(ply) == false then
         ply:SendNotification("Inventory Full", NOTIFICATION_PICKUP, "materials/icons/pickup.png", "")
         return "Inventory Full"
@@ -116,7 +117,34 @@ function PickleAdillyEdit(ply, wep, amount)
         return
     end
 
+    if amount == 0 then return end
     if wep == "Wood" and amount == 0 then return end
+    if tru then
+        ply:SetNWFloat(wep, amount)
+        if itemz.Category == "Weapons" then
+            local sloto = FindValidSlotfw(ply)
+            ply.tbl[sloto] = {
+                Slotz = sloto,
+                Weapon = wep,
+                Img = itemz.model,
+                Amount = math.Clamp(amount, 1, itemz.StackSize or 0),
+            }
+        else
+            local sloto = FindValidSlotBackWards(ply, itemz)
+            ply.tbl[sloto] = {
+                Slotz = sloto,
+                Weapon = wep,
+                Img = itemz.model,
+                Amount = math.Clamp(amount, 1, itemz.StackSize or 0),
+            }
+        end
+
+        net.Start("DragNDropRust")
+        net.WriteTable(ply.tbl)
+        net.Send(ply)
+        return
+    end
+
     -- Check total
     --local total = ply:CalcTotal(wep)
     --if total < amount then
@@ -178,31 +206,7 @@ function PickleAdillyEdit(ply, wep, amount)
         if itemz.Weapon ~= "" then ply:Give(itemz.Weapon) end
     end
     --[[local slot = FindSlot(ply, wep)
-    if slot == nil and amount > 0 then
-        ply:SetNWFloat(wep, amount)
-        if itemz.Category == "Weapons" then
-            local sloto = FindValidSlotfw(ply)
-            ply.tbl[sloto] = {
-                Slotz = sloto,
-                Weapon = wep,
-                Img = itemz.model,
-                Amount = math.Clamp(amount, 1, itemz.StackSize or 0),
-            }
-        else
-            local sloto = FindValidSlotBackWards(ply)
-            ply.tbl[sloto] = {
-                Slotz = sloto,
-                Weapon = wep,
-                Img = itemz.model,
-                Amount = math.Clamp(amount, 1, itemz.StackSize or 0),
-            }
-        end
-
-        net.Start("DragNDropRust")
-        net.WriteTable(ply.tbl)
-        net.Send(ply)
-        return
-    end
+    
 
     
 
@@ -257,8 +261,9 @@ function meta:GetItem(item)
     end
 end
 
-function meta:GiveItem(item, amount)
-    local itmz = PickleAdillyEdit(self, item, amount)
+function meta:GiveItem(item, amount, tru)
+    tru = tru or false
+    local itmz = PickleAdillyEdit(self, item, amount, tru)
     if itmz ~= "Inventory Full" then self:SendNotification(item, NOTIFICATION_PICKUP, "materials/icons/pickup.png", "+" .. amount .. "/" .. self:CalcTotal(item) or 0) end
     return true
 end
@@ -272,57 +277,14 @@ function meta:TakeItem(item, amount, slotz)
     end
 
     slotz = slotz or FindValidSlotBackWards(self, itemz)
-    local ActualHasITem = false
-    for k, v in pairs(self.tbl) do
-        if v.Weapon == nil then continue end
-        if v.Weapon == item then ActualHasITem = true end
-    end
-
-    local slotss = 0
-    local adding = false
-    local editmode = false
-    local CurrentAmount = 0 --
-    for k, v in pairs(self.tbl) do
-        if not istable(v) then continue end
-        if v.Weapon == itemz.Name then
-            local amont = v.Amount or 0
-            if amont ~= nil and amont >= 1000 then
-                adding = true
-                slotss = k
-                CurrentAmount = amont
-            elseif v.Weapon == itemz.Name and amont < 1000 then
-                editmode = true
-                slotss = k
-                CurrentAmount = amont
-                break
-            end
-        end
-    end
-
     local total = self:CalcTotal(itemz.Name)
-    if total < amount then
-        self:SendNotification("", NOTIFICATION_REMOVE, "materials/icons/bite.png", "Not enough " .. itemz.Name)
-        return false
-    end
-
-    --if ActualHasITem == false then return end
-    self.tbl[slotss] = {
-        Slotz = slotss,
-        Weapon = itemz.Weapon,
-        Img = itemz.model,
-        Amount = CurrentAmount - amount,
-        SlotFree = false
+    --if total < amount then
+    --  self:SendNotification("", NOTIFICATION_REMOVE, "materials/icons/bite.png", "Not enough " .. itemz.Name)
+    --   return false
+    --end
+    self.tbl[slotz] = {
+        SlotFree = true
     }
-
-    print(CurrentAmount)
-    if CurrentAmount <= 0 then
-        self.tbl[-1] = nil -- Removes duplicate bug -- ChatGPT code
-        self.tbl[slotz] = nil
-        self.tbl[slotz] = {}
-        self.tbl[slotz] = {
-            SlotFree = true
-        }
-    end
 
     self:SetNWFloat(itemz.Weapon, 0)
     self:SendNotification(item, NOTIFICATION_REMOVE, "materials/icons/bite.png", "Removed: " .. amount)
@@ -353,6 +315,7 @@ net.Receive("gRustWriteSlot", function(len, ply)
     local fromItem = ply.tbl[proxy_id]
     if not fromItem then return end
     local targetItem = ply.tbl[id] -- what's in target slot (if anything)
+    if id == -1 then return end
     -- Weapon selection logic
     if id >= 1 and id <= 6 then
         ply:SelectWeapon(itemz.Weapon)
@@ -434,7 +397,6 @@ net.Receive("gRustDropInv", function(len, ply)
     -- Case: drop to world
     if targetID == -1 then
         local dropPos = ply:GetShootPos() + ply:GetAimVector() * 30
-        ply:TakeItem(itemID, invItem.Amount or 1, fromSlot)
         local ent = ents.Create("rust_item")
         if IsValid(ent) then
             ent:SetPos(dropPos)
@@ -442,6 +404,8 @@ net.Receive("gRustDropInv", function(len, ply)
             ent:SetCount(invItem.Amount or 1)
             ent:Spawn()
             ent:Activate()
+            -- FIXED: Remove item BEFORE sending updated table
+            ply:TakeItem(itemID, invItem.Amount or 1, fromSlot)
             net.Start("DragNDropRust")
             net.WriteTable(ply.tbl)
             net.Send(ply)
@@ -460,7 +424,7 @@ hook.Add("PlayerSpawn", "GiveITem", function(ply)
         }
     end
 
-    PickleAdillyEdit(ply, "AK47", 1)
+    PickleAdillyEdit(ply, "Wand", 1)
     PickleAdillyEdit(ply, "Hatchet", 1)
     PickleAdillyEdit(ply, "Pickaxe", 1)
     ply:Give("rust_hands")

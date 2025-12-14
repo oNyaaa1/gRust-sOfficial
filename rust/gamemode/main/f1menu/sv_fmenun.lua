@@ -4,7 +4,7 @@ net.Receive("f1MenuGRustAdmin", function(len, pl)
     if not pl:IsAdmin() then return end
     local itemName = net.ReadString()
     local stack = ITEMS:GetItem(itemName)
-    pl:GiveItem(itemName, stack.StackSize or stack.Count)
+    pl:GiveItem(itemName, stack.StackSize or stack.Count, true)
 end)
 
 hook.Add("ShowHelp", "gRust_F1MenuYes", function(ply)
