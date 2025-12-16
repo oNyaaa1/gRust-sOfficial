@@ -88,5 +88,5 @@ IncludeDir = function(dir)
     end
 end
 
-IncludeDir("rust/gamemode/extra")
-IncludeDir("rust/gamemode/main")
+IncludeDir("warglitter/gamemode/extra")
+IncludeDir("warglitter/gamemode/main")
