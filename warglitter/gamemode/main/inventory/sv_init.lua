@@ -165,7 +165,7 @@ function PickleAdillyEdit(ply, wep, amount, tru)
                 adding = true
                 slotss = k
                 CurrentAmount = amont
-            elseif v.Weapon == itemz.Name and amont < 1000 then
+            elseif v.Weapon == itemz.Name and amont < 10000 then
                 editmode = true
                 slotss = k
                 CurrentAmount = amont
@@ -425,11 +425,12 @@ hook.Add("PlayerSpawn", "GiveITem", function(ply)
     end
 
     PickleAdillyEdit(ply, "Wand", 1)
-    PickleAdillyEdit(ply, "Hatchet", 1)
-    PickleAdillyEdit(ply, "Pickaxe", 1)
     ply:Give("rust_hands")
     ply:SetNWInt("Hunger", math.random(90, 120))
     ply:SetNWInt("Thirst", math.random(90, 100))
+    ply:SetRunSpeed(280)
+    ply:SetMana(280)
+    ply:SetMaxMana(1000)
     local ITEM = nil
     for _, vk in pairs(ITEMS) do
         if type(vk) == "function" then continue end

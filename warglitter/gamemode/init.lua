@@ -27,9 +27,9 @@ hook.Add("InitPostEntity", "MapChange", function()
 end)
 
 --[[
-Fixed small bug on drop duplication
-Fixed wood not stacking
-Added Wand instead of AK47 (Shoot bullets for now)
+Changed:
+Deleted f1menu and crafting
+Revamped wand
 
 ]]
 util.AddNetworkString("gRust_ServerModel_new")

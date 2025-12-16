@@ -1,23 +1,8 @@
 local ORE_WEAPONS = {
-    ["rust_wrock"] = {
+    ["rust_wand"] = {
         ["Metal Ore"] = 1,
         ["Sulfur Ore"] = 1,
         ["Stone"] = 1
-    },
-    ["tfa_rustalpha_stone_hatchet"] = {
-        ["Metal Ore"] = 1.94,
-        ["Sulfur Ore"] = 2.57,
-        ["Stone"] = 2.11733
-    },
-    ["tfa_rustalpha_pickaxe"] = {
-        ["Metal Ore"] = 2.4,
-        ["Sulfur Ore"] = 3,
-        ["Stone"] = 2.667
-    },
-    ["rust_jackhammer"] = {
-        ["Metal Ore"] = 2.4,
-        ["Sulfur Ore"] = 3,
-        ["Stone"] = 2.667
     }
 }
 

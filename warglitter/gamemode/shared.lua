@@ -18,6 +18,7 @@ function GM:Initialize()
         minsplash = 10,
         maxsplash = 5
     })
+
     game.AddAmmoType({
         name = "M249_AMMO", -- '#BULLET_PLAYER_556MM_ammo'
         dmgtype = DMG_BULLET,
@@ -59,6 +60,22 @@ end
 
 function meta:SetThirst(amy)
     self:SetNWInt("Thirst", amy)
+end
+
+function meta:SetMana(amy)
+    self:SetNWInt("Mana", amy)
+end
+
+function meta:GetMana()
+    return self:GetNWInt("Mana", 0)
+end
+
+function meta:SetMaxMana(amy)
+    self:SetNWInt("MaxMana", amy)
+end
+
+function meta:GetMaxMana()
+    return self:GetNWInt("MaxMana", 0)
 end
 
 local includes = function(f)

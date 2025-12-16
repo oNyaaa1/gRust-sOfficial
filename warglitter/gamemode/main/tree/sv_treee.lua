@@ -20,67 +20,6 @@ function meta:NotifyWood(amount)
     self:SendNotifyMsgLang("WoodReceive", amount)
 end
 
-local WOOD_WEAPONS = {
-    ["rust_wrock"] = {
-        mult = 0.5
-    },
-    ["tfa_rustalpha_stonehatchet"] = {
-        mult = 0.8
-    },
-    ["tfa_rustalpha_hatchet"] = {
-        mult = 1
-    }
-}
-
-local WOOD_SEQ = {6, 14, 22, 32, 43, 55, 68, 83, 99, 128}
-function SendTreeHit(ply, ent, class, hp)
-    if ent == nil then
-        net.Start("gRust.TreeEffects")
-        net.WriteVector(Vector())
-        net.WriteAngle(Angle())
-        net.WriteEntity(nil)
-        net.Broadcast()
-        return
-    end
-
-    local tr = ply:GetEyeTrace()
-    if not tr.Hit or tr.Entity ~= ent then return end
-    if ent.HitPos == nil then ent.HitPos = tr.HitPos end
-    local radius = 3
-    local randomOffset = VectorRand() * radius
-    randomOffset.x = math.Rand(-5, 5)
-    randomOffset.y = math.random(-1, 1)
-    ent.HitPos = ent.HitPos + ent:OBBCenter() * radius * Vector(1) --randomOffset
-    if ent.LastPos == nil then ent.LastPos = ent.HitPos end
-    local dist = tr.HitPos:Distance(ent.LastPos)
-    if not ent.NoMarker then
-        ent.HotspotPos = ent.HitPos
-        ent.LastPos = ent.HitPos
-        ent.NoMarker = true
-    end
-
-    local idx = math.min(ent.treeHits, #WOOD_SEQ)
-    local reward = 0
-    if dist <= 10 then
-        local tool = WOOD_WEAPONS[class]
-        reward = math.Round(WOOD_SEQ[idx] * tool.mult)
-        ent.HotspotPos = ent.HitPos
-        ent.LastPos = ent.HitPos
-        ply:EmitSound("combat/hitmarker.wav")
-        ply:GiveItem("Wood", reward, false)
-    elseif dist > 10 then
-        reward = math.Round(WOOD_SEQ[idx])
-        ply:GiveItem("Wood", reward, false)
-    end
-
-    net.Start("gRust.TreeEffects")
-    net.WriteVector(ent.LastPos)
-    net.WriteAngle(Angle(ply:GetAngles().x, ply:GetAngles().y, ply:GetAngles().z))
-    net.WriteEntity(ent)
-    net.WriteFloat(ent.treeHealth)
-    net.Broadcast()
-end
-
 local function MakeTreeFall(ent)
     if not IsValid(ent) then return end
     local treePos = ent:GetPos() -- Store tree information for respawn
@@ -141,6 +80,12 @@ local function MakeTreeFall(ent)
     end)
 end
 
+local WOOD_WEAPONS = {
+    ["rust_wand"] = {
+        mult = 0.5
+    },
+}
+
 local TREE_MODELS = {
     ["models/props_foliage/ah_super_large_pine002.mdl"] = 220,
     ["models/props_foliage/ah_large_pine.mdl"] = 190,
@@ -156,13 +101,66 @@ local TREE_MODELS = {
     ["models/props_foliage/ah_ash_tree_lg.mdl"] = 190
 }
 
-hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
+local WOOD_SEQ = {6, 14, 22, 32, 43, 55, 68, 83, 99, 128}
+function SendTreeHit(ply, ent, class, hp)
+    if ent == nil then
+        net.Start("gRust.TreeEffects")
+        net.WriteVector(Vector())
+        net.WriteAngle(Angle())
+        net.WriteEntity(nil)
+        net.Broadcast()
+        return
+    end
+
+    local tr = ply:GetEyeTrace()
+    if not tr.Hit or tr.Entity ~= ent then return end
+    if ent.HitPos == nil then ent.HitPos = tr.HitPos end
+    local radius = 3
+    local randomOffset = VectorRand() * radius
+    randomOffset.x = math.Rand(-5, 5)
+    randomOffset.y = math.random(-1, 1)
+    ent.HitPos = ent.HitPos + ent:OBBCenter() * radius * Vector(1) --randomOffset
+    if ent.LastPos == nil then ent.LastPos = ent.HitPos end
+    local dist = tr.HitPos:Distance(ent.LastPos)
+    if not ent.NoMarker then
+        ent.HotspotPos = ent.HitPos
+        ent.LastPos = ent.HitPos
+        ent.NoMarker = true
+    end
+
+    local maxHP = TREE_MODELS[ent:GetModel()]
+    if not ent.treeHealth then ent.treeHealth, ent.treeHits = maxHP, 0 end
+    if ent.treeHealth == nil then return end
+    ent.treeHealth, ent.treeHits = ent.treeHealth - 20, ent.treeHits + 1
+    local idx = math.min(ent.treeHits, #WOOD_SEQ)
+    local reward = 0
+    if dist <= 10 then
+        local tool = WOOD_WEAPONS[class]
+        reward = math.Round(WOOD_SEQ[idx] * tool.mult)
+        ent.HotspotPos = ent.HitPos
+        ent.LastPos = ent.HitPos
+        ply:EmitSound("combat/hitmarker.wav")
+        ply:GiveItem("Wood", reward, false)
+    elseif dist > 10 then
+        reward = math.Round(WOOD_SEQ[idx])
+        ply:GiveItem("Wood", reward, false)
+    end
+
+    if ent.treeHealth <= 0 then MakeTreeFall(ent) end
+    net.Start("gRust.TreeEffects")
+    net.WriteVector(ent.LastPos)
+    net.WriteAngle(Angle(ply:GetAngles().x, ply:GetAngles().y, ply:GetAngles().z))
+    net.WriteEntity(ent)
+    net.WriteFloat(ent.treeHealth)
+    net.Broadcast()
+end
+--[[hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
     local MAT = BackwardsEnums("MAT_")
     local ply = dmginfo:GetAttacker()
     if not IsValid(ply) then return end
     local wep = ply:GetActiveWeapon() --if not IsValid(ply) then return end
     if not IsValid(wep) then return end
-    local found = string.find(wep:GetClass(), "hatchet") or string.find(wep:GetClass(), "pickaxe") or string.find(wep:GetClass(), "rock")
+    local found = string.find(wep:GetClass(), "wand") or string.find(wep:GetClass(), "pickaxe") or string.find(wep:GetClass(), "rock")
     if ent.treeFallen == nil then ent.treeFallen = false end
     if found and MAT[ent:GetMaterialType()] == "MAT_WOOD" or MAT[ent:GetMaterialType()] == "MAT_CONCRETE" and ent.treeFallen == false then
         if not ply:IsPlayer() then return end
@@ -184,4 +182,4 @@ hook.Add("EntityTakeDamage", "TakeWoodDmg", function(ent, dmginfo)
     end
 
     if ent:GetClass() == "sent_rocks" then end
-end)
+end)]]

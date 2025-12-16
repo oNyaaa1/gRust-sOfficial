@@ -3,10 +3,10 @@
 local SpawningSystem = {}
 -- Configuration
 local SPAWN_DELAY = 5 -- Seconds to wait after map load
-CreateConVar("gr_spawnsystem_creatures", "90", {FCVAR_ARCHIVE}, "Chickens that spawn")
-CreateConVar("gr_spawnsystem_ores", "150", {FCVAR_ARCHIVE}, "Ores that spawn")
-CreateConVar("gr_spawnsystem_hemp", "90", {FCVAR_ARCHIVE}, "Hemp that spawn")
-CreateConVar("gr_spawnsystem_ore_pickups", "80", {FCVAR_ARCHIVE}, "Ore pickups that spawn")
+CreateConVar("gr_spawnsystem_creatures", "1000", {FCVAR_ARCHIVE}, "Chickens that spawn")
+CreateConVar("gr_spawnsystem_ores", "1000", {FCVAR_ARCHIVE}, "Ores that spawn")
+CreateConVar("gr_spawnsystem_hemp", "1000", {FCVAR_ARCHIVE}, "Hemp that spawn")
+CreateConVar("gr_spawnsystem_ore_pickups", "1000", {FCVAR_ARCHIVE}, "Ore pickups that spawn")
 local trees = 1000
 local creatureSpawns = GetConVar("gr_spawnsystem_creatures"):GetInt() * 2.5
 local oreSpawns = GetConVar("gr_spawnsystem_ores"):GetInt() * 2.5
