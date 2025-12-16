@@ -1,7 +1,7 @@
-"rust"
+"warglitter"
 {
 	"base"		    "base"
-	"title"		    "rust"
+	"title"		    "WarZone | Terrority Based"
 	"maps"		    ""
 	"category"	    "pvp"
 	"menusystem"	"1"
